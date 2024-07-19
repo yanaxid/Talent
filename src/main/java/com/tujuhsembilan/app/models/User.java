@@ -1,0 +1,69 @@
+package com.tujuhsembilan.app.models;
+
+import java.util.List;
+import java.util.UUID;
+
+import org.springframework.data.jpa.domain.support.AuditingEntityListener;
+
+import jakarta.persistence.Column;
+import jakarta.persistence.Embedded;
+import jakarta.persistence.Entity;
+import jakarta.persistence.EntityListeners;
+import jakarta.persistence.GeneratedValue;
+import jakarta.persistence.GenerationType;
+import jakarta.persistence.Id;
+import jakarta.persistence.JoinColumn;
+import jakarta.persistence.ManyToOne;
+import jakarta.persistence.OneToMany;
+import jakarta.validation.constraints.Size;
+import lombok.AllArgsConstructor;
+import lombok.Builder;
+import lombok.Data;
+import lombok.NoArgsConstructor;
+
+@Data
+@AllArgsConstructor
+@NoArgsConstructor
+@Builder
+@Entity
+@EntityListeners(AuditingEntityListener.class)
+
+public class User {
+
+   @Id
+   @GeneratedValue(strategy = GenerationType.UUID)
+   @Column(name = "user_id")
+   private UUID userId;
+
+   @ManyToOne
+   @JoinColumn(name = "role_id")
+   private Role role;
+
+   @Column(name = "username", length = 50)
+   @Size(max = 50)
+   private String username;
+
+   @Column(length = 100)
+   @Size(max = 50)
+   private String email;
+
+   @Column(name = "first_name")
+   private String firstName;
+
+   @Column(name = "last_name")
+   private String lastName;
+
+   private String password;
+
+   @Column(name = "is_active")
+   private Boolean isActive;
+
+   // --> creation
+   @Embedded
+   private Creation creation;
+
+   //--> relation
+   @OneToMany(mappedBy = "user")
+   private List<Client> clients;
+
+}
