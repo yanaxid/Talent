@@ -10,6 +10,7 @@ import jakarta.persistence.Column;
 import jakarta.persistence.Embedded;
 import jakarta.persistence.Entity;
 import jakarta.persistence.EntityListeners;
+import jakarta.persistence.FetchType;
 import jakarta.persistence.GeneratedValue;
 import jakarta.persistence.GenerationType;
 import jakarta.persistence.Id;
@@ -65,6 +66,6 @@ public class Client {
 
 
    //--> relation
-   @OneToMany(mappedBy = "client")
+   @OneToMany(mappedBy = "client", fetch = FetchType.LAZY)
    private List<TalentWishlist> talentWishlists;
 }

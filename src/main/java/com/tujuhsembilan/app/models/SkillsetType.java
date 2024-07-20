@@ -9,6 +9,7 @@ import jakarta.persistence.Column;
 import jakarta.persistence.Embedded;
 import jakarta.persistence.Entity;
 import jakarta.persistence.EntityListeners;
+import jakarta.persistence.FetchType;
 import jakarta.persistence.GeneratedValue;
 import jakarta.persistence.GenerationType;
 import jakarta.persistence.Id;
@@ -51,7 +52,7 @@ public class SkillsetType {
 
    //--> relation
 
-   @OneToMany(mappedBy = "skillsetType")
+   @OneToMany(mappedBy = "skillsetType", fetch = FetchType.LAZY)
    private List<Skillset> skillsets;
 
 }

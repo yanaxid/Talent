@@ -29,4 +29,10 @@ public interface TalentRepository extends JpaRepository<Talent, UUID>, JpaSpecif
          "JOIN ts.skillset s " +
          "WHERE t.talentId = :talentId")
    List<SkillsetResponseDTO> findSkillsetsByTalentId(@Param("talentId") UUID talentId);
+
+
+   @Query("SELECT CASE WHEN COUNT(t) > 0 THEN true ELSE false END " +
+           "FROM Talent t JOIN t.talentLevel tl " +
+           "WHERE LOWER(tl.talentLevelName) = LOWER(:talentLevelName)")
+    boolean existsByTalentLevelNameIgnoreCase(@Param("talentLevelName") String talentLevelName);
 }

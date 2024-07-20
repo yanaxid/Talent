@@ -9,6 +9,7 @@ import jakarta.persistence.Column;
 import jakarta.persistence.Embedded;
 import jakarta.persistence.Entity;
 import jakarta.persistence.EntityListeners;
+import jakarta.persistence.FetchType;
 import jakarta.persistence.GeneratedValue;
 import jakarta.persistence.GenerationType;
 import jakarta.persistence.Id;
@@ -48,7 +49,7 @@ public class TalentLevel {
    private Creation creation;
 
    //--> relation
-   @OneToMany(mappedBy = "talentLevel")
+   @OneToMany(mappedBy = "talentLevel", fetch = FetchType.LAZY)
    private List<Talent> talents;
 
 
