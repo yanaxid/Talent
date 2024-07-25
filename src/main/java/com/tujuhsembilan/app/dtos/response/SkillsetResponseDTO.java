@@ -13,7 +13,6 @@ import lombok.NoArgsConstructor;
 @Builder
 public class SkillsetResponseDTO {
 
-
    private UUID skillId;
    private String skillName;
 

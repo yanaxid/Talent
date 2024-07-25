@@ -38,17 +38,15 @@ public class TalentWishlist {
    @Column(name = "talent_wishlist_id")
    private UUID talentWishlistId;
 
-  
    @ManyToOne
-   @JoinColumn(name = "talent_id", unique = true, nullable = false)
+   @JoinColumn(name = "talent_id", nullable = false)
    private Talent talent;
 
- 
    @ManyToOne
-   @JoinColumn(name = "client_id", unique = true, nullable = false)
+   @JoinColumn(name = "client_id", nullable = false)
    private Client client;
 
-   @Column(name = "wishlist_date", unique = true, nullable = false)
+   @Column(name = "wishlist_date", nullable = false)
    private Date wishlistDate;
 
    @Column(name = "is_active")
@@ -59,10 +57,8 @@ public class TalentWishlist {
    private Creation creation;
 
    // --> relation
-
    @OneToMany(mappedBy = "talentWishlist", fetch = FetchType.LAZY)
    private List<TalentRequest> talentRequests;
-
 
 
 }

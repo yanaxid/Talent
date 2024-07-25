@@ -8,12 +8,12 @@ import lombok.Data;
 import lombok.NoArgsConstructor;
 
 @Data
-@Builder
 @NoArgsConstructor
 @AllArgsConstructor
+@Builder
+public class EmployeeStatusResponseDTO {
 
-public class PositionResponseDTO {
+   private UUID employeeStatusId;
+   private String employeeStatusName;
 
-   private UUID positionId;
-   private String positionName;
 }

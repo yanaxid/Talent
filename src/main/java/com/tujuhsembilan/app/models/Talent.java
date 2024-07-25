@@ -2,10 +2,17 @@ package com.tujuhsembilan.app.models;
 
 import java.util.Date;
 import java.util.List;
+import java.util.Set;
 import java.util.UUID;
 
+import org.hibernate.FetchMode;
+import org.hibernate.annotations.BatchSize;
+import org.hibernate.annotations.Fetch;
 import org.springframework.data.jpa.domain.support.AuditingEntityListener;
 
+import com.fasterxml.jackson.annotation.JsonIgnore;
+
+import jakarta.persistence.CascadeType;
 import jakarta.persistence.Column;
 import jakarta.persistence.Embedded;
 import jakarta.persistence.Entity;
@@ -14,9 +21,12 @@ import jakarta.persistence.FetchType;
 import jakarta.persistence.GeneratedValue;
 import jakarta.persistence.GenerationType;
 import jakarta.persistence.Id;
+import jakarta.persistence.Index;
 import jakarta.persistence.JoinColumn;
 import jakarta.persistence.ManyToOne;
 import jakarta.persistence.OneToMany;
+import jakarta.persistence.OneToOne;
+import jakarta.persistence.Table;
 import jakarta.validation.constraints.Size;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
@@ -29,7 +39,6 @@ import lombok.NoArgsConstructor;
 @Builder
 @Entity
 @EntityListeners(AuditingEntityListener.class)
-
 public class Talent {
 
    @Id
@@ -72,7 +81,7 @@ public class Talent {
    private String talentCvFilename;
 
    @Column(name = "experience")
-   private Integer experience;
+   private Integer talentExperience;
 
    @Column(length = 100)
    @Size(max = 100)
@@ -99,9 +108,8 @@ public class Talent {
    private Creation creation;
 
    // --> relation
-
-   @OneToMany(mappedBy = "talent", fetch = FetchType.LAZY)
-   private List<TalentMetadata> talentMetadatas;
+   @OneToOne(mappedBy = "talent", fetch = FetchType.LAZY)
+   private TalentMetadata talentMetadata;
 
    @OneToMany(mappedBy = "talent", fetch = FetchType.LAZY)
    private List<TalentPosition> talentPositions;

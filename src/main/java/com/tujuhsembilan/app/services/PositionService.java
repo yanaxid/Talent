@@ -52,7 +52,7 @@ public class PositionService {
                PositionResponseDTO response = new PositionResponseDTO();
                response.setPositionId(p.getPositionId());
                response.setPositionName(p.getPositionName());
-               response.setStatus(p.getIsActive());
+         
                return response;
 
             }).collect(Collectors.toList());
@@ -87,7 +87,7 @@ public class PositionService {
 
          Position position = Position.builder()
                .positionName(extractedPositionName)
-               .isActive(true)
+              
                .creation(new Creation())
                .build();
 
@@ -96,8 +96,8 @@ public class PositionService {
          // --> convert to DTO
          PositionResponseDTO response = new PositionResponseDTO(
                position.getPositionId(),
-               position.getPositionName(),
-               position.getIsActive());
+               position.getPositionName());
+             
 
          String message = messageSource.getMessage("position.add.success", null, Locale.getDefault());
          String formatMessage = MessageFormat.format(message, position.getPositionName());
@@ -129,7 +129,7 @@ public class PositionService {
       PositionResponseDTO positionResponeDTO = PositionResponseDTO.builder()
             .positionId(positionOPT.get().getPositionId())
             .positionName(positionOPT.get().getPositionName())
-            .status(positionOPT.get().getIsActive())
+         
             .build();
       return positionResponeDTO;
 
@@ -173,8 +173,8 @@ public class PositionService {
          // --> convert to DTO
          PositionResponseDTO response = new PositionResponseDTO(
                position.getPositionId(),
-               position.getPositionName(),
-               position.getIsActive());
+               position.getPositionName());
+      
 
          String message = messageSource.getMessage("position.put.success", null, Locale.getDefault());
          String formatMessage = MessageFormat.format(message, position.getPositionName());
@@ -227,8 +227,8 @@ public class PositionService {
          // --> convert to DTO
          PositionResponseDTO response = new PositionResponseDTO(
                position.getPositionId(),
-               position.getPositionName(),
-               position.getIsActive());
+               position.getPositionName());
+        
 
          String message = messageSource.getMessage("position.del.success", null, Locale.getDefault());
          String formatMessage = MessageFormat.format(message, position.getPositionName());

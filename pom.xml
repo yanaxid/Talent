@@ -154,6 +154,22 @@
 			<artifactId>commons-codec</artifactId>
 			<version>1.16.0</version>
 		</dependency>
+
+
+      <!-- cahce -->
+      <dependency>
+         <groupId>org.springframework.boot</groupId>
+         <artifactId>spring-boot-starter-cache</artifactId>
+      </dependency>
+
+
+      <dependency>
+         <groupId>com.github.ben-manes.caffeine</groupId>
+         <artifactId>caffeine</artifactId>
+         <version>3.1.8</version>
+      </dependency>
+
+
 	</dependencies>
 
 	<build>

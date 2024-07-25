@@ -34,7 +34,7 @@ public class PositionController {
    public List<PositionResponseDTO> getMasterTalentPosition(@ModelAttribute PositionRequestDTO request,
          CustomPageRequest customPageRequest) {
 
-      return positionService.getMasterTalentPosition(request, customPageRequest.getPage("positionId"));
+      return positionService.getMasterTalentPosition(request, customPageRequest.getPage("positionId,asc"));
    }
 
    // --> post :: position

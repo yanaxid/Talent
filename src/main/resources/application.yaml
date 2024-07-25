@@ -87,3 +87,16 @@ spring:
       properties: 
          hibernate:
             dialect: org.hibernate.dialect.PostgreSQLDialect
+            format-sql: true
+            use-sql-comments: true
+           
+  
+# logging:
+#   level:
+#     org:
+#       hibernate:
+#         SQL: DEBUG
+#         type:
+#           descriptor:
+#             sql:
+#               BasicBinder: TRACE

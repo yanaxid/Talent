@@ -1,19 +1,18 @@
 package com.tujuhsembilan.app.dtos.response;
 
-import java.util.UUID;
-
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 
-@Data
+@Data 
 @Builder
 @NoArgsConstructor
-@AllArgsConstructor
+@AllArgsConstructor 
 
-public class PositionResponseDTO {
-
-   private UUID positionId;
-   private String positionName;
+public class NotFoundResponse {
+   
+    private String message;
+    private int statusCode;
+    private String status;
 }
