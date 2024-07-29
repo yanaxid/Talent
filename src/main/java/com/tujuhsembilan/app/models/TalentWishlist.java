@@ -38,11 +38,11 @@ public class TalentWishlist {
    @Column(name = "talent_wishlist_id")
    private UUID talentWishlistId;
 
-   @ManyToOne
+   @ManyToOne(fetch = FetchType.LAZY)
    @JoinColumn(name = "talent_id", nullable = false)
    private Talent talent;
 
-   @ManyToOne
+   @ManyToOne(fetch = FetchType.LAZY)
    @JoinColumn(name = "client_id", nullable = false)
    private Client client;
 

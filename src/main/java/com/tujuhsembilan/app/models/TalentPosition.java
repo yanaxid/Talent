@@ -26,12 +26,12 @@ import lombok.NoArgsConstructor;
 public class TalentPosition {
 
    @Id
-   @ManyToOne
+   @ManyToOne(fetch = FetchType.LAZY)
    @JoinColumn(name = "talent_id")
    private Talent talent;
 
    @Id
-   @ManyToOne
+   @ManyToOne(fetch = FetchType.LAZY)
    @JoinColumn(name = "position_id")
    private Position position;
 

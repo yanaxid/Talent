@@ -27,12 +27,12 @@ import lombok.NoArgsConstructor;
 public class TalentSkillset {
 
    @Id
-   @ManyToOne
+   @ManyToOne(fetch = FetchType.LAZY)
    @JoinColumn(name = "talent_id")
    private Talent talent;
 
    @Id
-   @ManyToOne
+   @ManyToOne(fetch = FetchType.LAZY)
    @JoinColumn(name = "skillset_id")
    private Skillset skillset;
 

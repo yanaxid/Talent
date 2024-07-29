@@ -12,23 +12,23 @@ import jakarta.persistence.criteria.Predicate;
 
 public class PositionSpecification {
 
-   public static Specification<Position> filter(PositionRequestDTO positionRequestDTO) {
+   public static Specification<Position> filter(PositionRequestDTO filter) {
       return (root, query, criteriaBuilder) -> {
 
          List<Predicate> predicates = new ArrayList<Predicate>();
 
-         if (positionRequestDTO.getPositionName() != null) {
+         if (filter.getPositionName() != null) {
 
             predicates.add(criteriaBuilder.like(
                   criteriaBuilder.lower(root.get("positionName")),
-                  "%" + positionRequestDTO.getPositionName().toLowerCase() + "%"));
+                  "%" + filter.getPositionName().toLowerCase() + "%"));
          }
 
-         if (positionRequestDTO.getStatus() != null) {
+         if (filter.getStatus() != null) {
 
             predicates.add(criteriaBuilder.equal(
                   root.get("isActive"),
-                  positionRequestDTO.getStatus()));
+                  filter.getStatus()));
          }
 
          return criteriaBuilder.and(predicates.toArray(new Predicate[predicates.size()]));

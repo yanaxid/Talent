@@ -1,7 +1,6 @@
 package com.tujuhsembilan.app.services;
 
 import java.text.MessageFormat;
-import java.util.ArrayList;
 import java.util.List;
 import java.util.Locale;
 import java.util.Optional;
@@ -17,9 +16,8 @@ import org.springframework.data.jpa.domain.Specification;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Service;
-import org.springframework.web.bind.annotation.PathVariable;
 
-import com.tujuhsembilan.app.dtos.request.TalentRequestDTO;
+import com.tujuhsembilan.app.dtos.request.TalentFilterDTO;
 import com.tujuhsembilan.app.dtos.response.NotFoundResponse;
 import com.tujuhsembilan.app.dtos.response.PositionResponseDTO;
 import com.tujuhsembilan.app.dtos.response.SkillsetResponseDTO;
@@ -29,12 +27,15 @@ import com.tujuhsembilan.app.models.Talent;
 import com.tujuhsembilan.app.repository.EmployeeStatusRepository;
 import com.tujuhsembilan.app.repository.TalentLevelRepository;
 import com.tujuhsembilan.app.repository.TalentRepository;
+import com.tujuhsembilan.app.repository.TalentRequestRepository;
 import com.tujuhsembilan.app.repository.TalentStatusRepository;
 import com.tujuhsembilan.app.services.spesification.TalentSpecification;
 
+import jakarta.transaction.Transactional;
 import lombok.extern.slf4j.Slf4j;
 
 @Slf4j
+@Transactional
 @Service
 public class TalentService {
 
@@ -53,12 +54,12 @@ public class TalentService {
    @Autowired
    private MessageSource messageSource;
 
-   // @Autowired
-   // private TalentRequestRepository talentRequestRepository;
+   @Autowired
+   private TalentRequestRepository talentRequestRepository;
 
    // --> GET :: all talents
    // @Cacheable("talents")
-   public ResponseEntity<?> getTalents(TalentRequestDTO request, Pageable pageable) {
+   public ResponseEntity<?> getTalents(TalentFilterDTO request, Pageable pageable) {
 
       log.info("Pageable received in service: {}", pageable);
 
@@ -106,7 +107,7 @@ public class TalentService {
       log.info("try +++++++++++++++++++++++++++++++++++++++++++++");
       Page<Talent> talents = talentRepository.findAll(spec, pageable);
 
-      List<TalentResponseDTO> talentResponseDTOs = talents.getContent().stream().map(
+      List<TalentResponseDTO> talentResponseDTOs = talents.stream().map(
             t -> {
                TalentResponseDTO response = new TalentResponseDTO();
                response.setTalentId(t.getTalentId());
@@ -114,22 +115,62 @@ public class TalentService {
                response.setTalentName(t.getTalentName());
                response.setTalentStatus(t.getTalentStatus() != null ? t.getTalentStatus().getTalentStatusName() : null);
                response.setEmployeeStatus(
-                     t.getEmployeeStatus() != null ? t.getEmployeeStatus().getEmployeeStatusName()
-                           : null);
+                     t.getEmployeeStatus() != null ? t.getEmployeeStatus().getEmployeeStatusName() : null);
                response.setTalentAvailability(t.getTalentAvailability());
                response.setTalentExperience(t.getTalentExperience());
                response.setTalentLevel(t.getTalentLevel() != null ? t.getTalentLevel().getTalentLevelName() : null);
 
+               // --> most efective
                // --> mendapatkan PositionResponseDTO
-               List<PositionResponseDTO> positions = talentRepository.findPositionsByTalentId(t.getTalentId());
-               response.setPositions(positions.isEmpty() ? null : positions);
+               List<PositionResponseDTO> positions = t.getTalentPositions().stream()
+                     .map(tp -> new PositionResponseDTO(tp.getPosition().getPositionId(),
+                           tp.getPosition().getPositionName()))
+                     .collect(Collectors.toList());
+               response.setPositions(positions);
 
                // --> mendapatkan SkillsetResponseDTO
-               List<SkillsetResponseDTO> skillsets = talentRepository.findSkillsetsByTalentId(t.getTalentId());
-               response.setSkillsets(skillsets.isEmpty() ? null : skillsets);
+               List<SkillsetResponseDTO> skillsets = t.getTalentSkillsets().stream()
+                     .map(ts -> new SkillsetResponseDTO(ts.getSkillset().getSkillsetId(),
+                           ts.getSkillset().getSkillsetName()))
+                     .collect(Collectors.toList());
+               response.setSkillsets(skillsets);
 
                return response;
             }).collect(Collectors.toList());
+
+      // List<TalentResponseDTO> talentResponseDTOs =
+      // talents.getContent().stream().map(
+      // t -> {
+      // TalentResponseDTO response = new TalentResponseDTO();
+      // response.setTalentId(t.getTalentId());
+      // response.setTalentPhotoUrl(t.getTalentPhotoFilename());
+      // response.setTalentName(t.getTalentName());
+      // response.setTalentStatus(t.getTalentStatus() != null ?
+      // t.getTalentStatus().getTalentStatusName() : null);
+      // response.setEmployeeStatus(
+      // t.getEmployeeStatus() != null ? t.getEmployeeStatus().getEmployeeStatusName()
+      // : null);
+      // response.setTalentAvailability(t.getTalentAvailability());
+      // response.setTalentExperience(t.getTalentExperience());
+      // response.setTalentLevel(t.getTalentLevel() != null ?
+      // t.getTalentLevel().getTalentLevelName() : null);
+
+      // // --> mendapatkan PositionResponseDTO
+      // List<PositionResponseDTO> positions =
+      // talentRepository.findPositionsByTalentId(t.getTalentId());
+      // response.setPositions(positions.isEmpty() ? null : positions);
+
+      // // response.setPositions(null);
+
+      // // --> mendapatkan SkillsetResponseDTO
+      // List<SkillsetResponseDTO> skillsets =
+      // talentRepository.findSkillsetsByTalentId(t.getTalentId());
+      // response.setSkillsets(skillsets.isEmpty() ? null : skillsets);
+
+      // // response.setSkillsets(null);
+
+      // return response;
+      // }).collect(Collectors.toList());
 
       if (talentResponseDTOs.isEmpty()) {
          return ResponseEntity.status(HttpStatus.NOT_FOUND).body("No talents found for the given criteria.");
@@ -175,19 +216,22 @@ public class TalentService {
             ? talentOPT.get().getTalentMetadata().getTotalProjectCompleted()
             : null);
 
-      td.setTotalRequested(
-            talentOPT.get().getTalentMetadata() != null ? talentOPT.get().getTalentMetadata().getProfileCounter()
-                  : null);
-      // td.setTotalRequested(talentRequestRepository.countApprovedRequests());
+      td.setTotalRequested(talentRequestRepository.countRequestsByTalentId(talentId));
 
       // --> mendapatkan PositionResponseDTO
-      List<PositionResponseDTO> positions = talentRepository
-            .findPositionsByTalentId(talentId);
+      List<PositionResponseDTO> positions = talentOPT.get().getTalentPositions().stream()
+            .map(tp -> new PositionResponseDTO(tp.getPosition().getPositionId(), tp.getPosition().getPositionName()))
+            .collect(Collectors.toList());
+      // td.setPositions(positions);
+      td.setPosition(positions.isEmpty() ? null : positions);
+
       td.setPosition(positions.isEmpty() ? null : positions);
 
       // --> mendapatkan SkillsetResponseDTO
-      List<SkillsetResponseDTO> skillsets = talentRepository
-            .findSkillsetsByTalentId(talentId);
+      List<SkillsetResponseDTO> skillsets = talentOPT.get().getTalentSkillsets().stream()
+            .map(ts -> new SkillsetResponseDTO(ts.getSkillset().getSkillsetId(),
+                  ts.getSkillset().getSkillsetName()))
+            .collect(Collectors.toList());
       td.setSkillSet(skillsets.isEmpty() ? null : skillsets);
 
       td.setEmail(talentOPT.get().getEmail());

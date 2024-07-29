@@ -11,7 +11,7 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
 import com.tujuhsembilan.app.dtos.request.CustomPageRequest;
-import com.tujuhsembilan.app.dtos.request.TalentRequestDTO;
+import com.tujuhsembilan.app.dtos.request.TalentFilterDTO;
 import com.tujuhsembilan.app.services.TalentService;
 
 import lombok.extern.slf4j.Slf4j;
@@ -26,7 +26,7 @@ public class TalentController {
 
    // --> get :: daftar talents
    @GetMapping("/talents")
-   public ResponseEntity<?> getTalents(@ModelAttribute TalentRequestDTO request,
+   public ResponseEntity<?> getTalents(@ModelAttribute TalentFilterDTO request,
          CustomPageRequest customPageRequest) {
 
       return talentService.getTalents(request,
