@@ -69,14 +69,14 @@ spring:
    datasource:
       #URL EXTERNAL
       # url: jdbc:postgresql://cloudias79.com:5545/new_db_talentcenter
-      # url: jdbc:postgresql://10.10.5.180:5432/new_db_talentcenter
-      url: jdbc:postgresql://localhost:5432/talent_center
+      url: jdbc:postgresql://10.10.5.180:5432/new_db_talentcenter
+      # url: jdbc:postgresql://localhost:5432/talent_center
 
-      # username: usrtalentcenter
-      # password: m1QVs3zKymgPduz
+      username: usrtalentcenter
+      password: m1QVs3zKymgPduz
 
-      username: postgres
-      password: root
+      # username: postgres
+      # password: root
 
 
       driverClassName: org.postgresql.Driver
@@ -91,12 +91,12 @@ spring:
             use-sql-comments: true
            
   
-# logging:
-#   level:
-#     org:
-#       hibernate:
-#         SQL: DEBUG
-#         type:
-#           descriptor:
-#             sql:
-#               BasicBinder: TRACE
+logging:
+  level:
+    org:
+      hibernate:
+        SQL: ERROR
+        type:
+          descriptor:
+            sql:
+              BasicBinder: TRACE

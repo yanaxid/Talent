@@ -1,8 +1,11 @@
 package com.tujuhsembilan.app.models;
 
+import java.sql.Timestamp;
 import java.util.List;
 import java.util.UUID;
 
+import org.springframework.data.annotation.CreatedDate;
+import org.springframework.data.annotation.LastModifiedDate;
 import org.springframework.data.jpa.domain.support.AuditingEntityListener;
 
 import jakarta.persistence.Column;
@@ -16,6 +19,8 @@ import jakarta.persistence.Id;
 import jakarta.persistence.JoinColumn;
 import jakarta.persistence.ManyToOne;
 import jakarta.persistence.OneToMany;
+import jakarta.persistence.Temporal;
+import jakarta.persistence.TemporalType;
 import jakarta.validation.constraints.Size;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
@@ -32,8 +37,8 @@ import lombok.NoArgsConstructor;
 public class User {
 
    @Id
+   @Column(name = "user_id",unique = true,nullable = false)
    @GeneratedValue(strategy = GenerationType.UUID)
-   @Column(name = "user_id")
    private UUID userId;
 
    @ManyToOne

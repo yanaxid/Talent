@@ -24,6 +24,8 @@ import jakarta.persistence.Id;
 import jakarta.persistence.Index;
 import jakarta.persistence.JoinColumn;
 import jakarta.persistence.ManyToOne;
+import jakarta.persistence.NamedAttributeNode;
+import jakarta.persistence.NamedEntityGraph;
 import jakarta.persistence.OneToMany;
 import jakarta.persistence.OneToOne;
 import jakarta.persistence.Table;
@@ -46,15 +48,18 @@ public class Talent {
    @Column(name = "talent_id", nullable = false)
    private UUID talentId;
 
-   @ManyToOne
+   @ManyToOne(fetch = FetchType.LAZY)
+   @BatchSize(size = 10)
    @JoinColumn(name = "talent_level_id")
    private TalentLevel talentLevel;
 
-   @ManyToOne
+   @ManyToOne(fetch = FetchType.LAZY)
+   @BatchSize(size = 10)
    @JoinColumn(name = "talent_status_id")
    private TalentStatus talentStatus;
 
-   @ManyToOne
+   @ManyToOne(fetch = FetchType.LAZY)
+   @BatchSize(size = 10)
    @JoinColumn(name = "employee_status_id")
    private EmployeeStatus employeeStatus;
 
@@ -109,15 +114,19 @@ public class Talent {
 
    // --> relation
    @OneToOne(mappedBy = "talent", fetch = FetchType.LAZY)
+   @BatchSize(size = 10)
    private TalentMetadata talentMetadata;
 
    @OneToMany(mappedBy = "talent", fetch = FetchType.LAZY)
+   @BatchSize(size = 10)
    private List<TalentPosition> talentPositions;
 
    @OneToMany(mappedBy = "talent", fetch = FetchType.LAZY)
+   @BatchSize(size = 10)
    private List<TalentWishlist> talentWishlists;
 
    @OneToMany(mappedBy = "talent", fetch = FetchType.LAZY)
+   @BatchSize(size = 10)
    private List<TalentSkillset> talentSkillsets;
 
 }

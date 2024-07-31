@@ -2,6 +2,7 @@ package com.tujuhsembilan.app.models;
 
 import java.util.UUID;
 
+import org.hibernate.annotations.BatchSize;
 import org.springframework.data.jpa.domain.support.AuditingEntityListener;
 
 import jakarta.persistence.Column;

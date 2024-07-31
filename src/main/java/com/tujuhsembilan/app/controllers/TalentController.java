@@ -26,17 +26,23 @@ public class TalentController {
 
    // --> get :: daftar talents
    @GetMapping("/talents")
-   public ResponseEntity<?> getTalents(@ModelAttribute TalentFilterDTO request,
+   public ResponseEntity<?> getTalents(@ModelAttribute TalentFilterDTO filter,
          CustomPageRequest customPageRequest) {
 
-      return talentService.getTalents(request,
-            customPageRequest.getPage("talentExperience,asc;talentLevel,asc;talentName,asc"));
+      return talentService.getTalents(filter,
+            customPageRequest.getPage("talentExperience,desc;talentLevel,asc;talentName,asc"));
    }
 
    // --> get :: details talent
-   @GetMapping("/talents/{talentId}")
-   public ResponseEntity<?> getTalentById(@PathVariable UUID talentId) {
-      return talentService.getTalentById(talentId);
-   }
+   // @GetMapping("/talents/{talentId}")
+   // public ResponseEntity<?> getTalentById(@PathVariable UUID talentId) {
+   //    return talentService.getTalentById(talentId);
+   // }
+
+
+   
+
+
+
 
 }

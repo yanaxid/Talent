@@ -1,5 +1,6 @@
 package com.tujuhsembilan.app.models;
 
+import java.time.LocalDate;
 import java.util.Date;
 import java.util.UUID;
 
@@ -44,7 +45,7 @@ public class TalentRequest {
    private TalentWishlist talentWishlist;
 
    @Column(name = "request_date")
-   private Date reuestDate;
+   private Date requestDate;
 
    @Column(name = "request_reject_reason")
    private String requestRejectReason;
@@ -52,6 +53,4 @@ public class TalentRequest {
    // --> creation
    @Embedded
    private Creation creation;
-
-
 }

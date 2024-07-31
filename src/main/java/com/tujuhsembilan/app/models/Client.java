@@ -1,9 +1,12 @@
 package com.tujuhsembilan.app.models;
 
+import java.sql.Timestamp;
 import java.util.Date;
 import java.util.List;
 import java.util.UUID;
 
+import org.springframework.data.annotation.CreatedDate;
+import org.springframework.data.annotation.LastModifiedDate;
 import org.springframework.data.jpa.domain.support.AuditingEntityListener;
 
 import jakarta.persistence.Column;
@@ -17,6 +20,8 @@ import jakarta.persistence.Id;
 import jakarta.persistence.JoinColumn;
 import jakarta.persistence.ManyToOne;
 import jakarta.persistence.OneToMany;
+import jakarta.persistence.Temporal;
+import jakarta.persistence.TemporalType;
 import jakarta.validation.constraints.Size;
 import lombok.AllArgsConstructor;
 import lombok.Data;
@@ -38,7 +43,8 @@ public class Client {
    @JoinColumn(name = "client_position_id")
    private ClientPosition clientPosition;
 
-   @ManyToOne
+   // --> tanpa lazy menyebabkan error grammar
+   @ManyToOne(fetch = FetchType.LAZY) 
    @JoinColumn(name = "user_id")
    private User user;
 
@@ -64,8 +70,10 @@ public class Client {
    @Embedded
    private Creation creation;
 
-
-   //--> relation
+   // --> relation
    @OneToMany(mappedBy = "client", fetch = FetchType.LAZY)
    private List<TalentWishlist> talentWishlists;
+
+  
+
 }

@@ -3,7 +3,6 @@ package com.tujuhsembilan.app.dtos.request;
 
 import java.util.Date;
 import java.util.List;
-import java.util.UUID;
 
 import com.tujuhsembilan.app.dtos.response.PositionResponseDTO;
 import com.tujuhsembilan.app.dtos.response.SkillsetResponseDTO;

@@ -26,6 +26,7 @@ import com.tujuhsembilan.app.repository.PositionRepository;
 import com.tujuhsembilan.app.repository.SkillsetRepository;
 import com.tujuhsembilan.app.repository.TalentLevelRepository;
 import com.tujuhsembilan.app.repository.TalentRepository;
+import com.tujuhsembilan.app.repository.TalentRequestRepository;
 
 import jakarta.transaction.Transactional;
 import lib.i18n.utility.MessageUtil;
@@ -51,6 +52,9 @@ public class TalentMasterService {
 
    @Autowired
    private SkillsetRepository skillsetRepository;
+
+   @Autowired
+   private TalentRequestRepository talentRequestRepository;
 
    // @Autowired
    // private MinioService minioService;
@@ -106,6 +110,53 @@ public class TalentMasterService {
       }
       return ResponseEntity.ok(positionResponseDTOs);
    }
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 
 // 
 // --> post :: save data talent
