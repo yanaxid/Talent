@@ -7,6 +7,7 @@ import org.springframework.data.annotation.CreatedDate;
 import org.springframework.data.annotation.LastModifiedBy;
 import org.springframework.data.annotation.LastModifiedDate;
 import org.springframework.data.jpa.domain.support.AuditingEntityListener;
+import org.springframework.data.jpa.repository.EntityGraph;
 
 import jakarta.persistence.Column;
 import jakarta.persistence.Embeddable;
@@ -23,6 +24,7 @@ import lombok.NoArgsConstructor;
 @AllArgsConstructor
 @Embeddable
 @EntityListeners(AuditingEntityListener.class)
+
 
 public class Creation {
 

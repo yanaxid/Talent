@@ -14,6 +14,7 @@ import org.springframework.web.bind.annotation.RestController;
 import org.springframework.web.multipart.MultipartFile;
 
 import com.tujuhsembilan.app.dtos.request.TalentRequestDTO;
+import com.tujuhsembilan.app.dtos.response.TalentDetailResponseDTO;
 import com.tujuhsembilan.app.services.TalentMasterService;
 
 // import com.tujuhsembilan.app.services.TalentMasterService;
@@ -52,43 +53,37 @@ public class TalentMasterController {
       return talentMasterService.getMasterTalentPosition();
    }
 
+   // --> post :: save data talent
+   @PostMapping(path = { "/talents" }, consumes = {
+         MediaType.APPLICATION_JSON_VALUE,
+         MediaType.MULTIPART_FORM_DATA_VALUE }, produces = { MediaType.APPLICATION_JSON_VALUE })
+   public ResponseEntity<?> saveDataTalent(
+         @RequestPart("request") TalentRequestDTO request,
+         @RequestPart(value = "photoFile", required = false) MultipartFile photoFile,
+         @RequestPart(value = "cvFile", required = false) MultipartFile cvFile) {
+
+      return talentMasterService.saveDataTalent(request, photoFile, cvFile);
+
+   }
 
 
 
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-   // --> post :: Save Data Talent
-   // @PostMapping(path = { "/talent-management/talents" }, consumes = {
+   // @PostMapping(path = "/talents", consumes = {
    //       MediaType.APPLICATION_JSON_VALUE,
    //       MediaType.MULTIPART_FORM_DATA_VALUE }, produces = { MediaType.APPLICATION_JSON_VALUE })
-   // public ResponseEntity<?> saveDataTalent(
-   //       @RequestPart("request") TalentRequestDTO request,
-   //       @RequestPart(value = "file", required = false) MultipartFile file) {
-   //    return talentMasterService.saveDataTalent(request, file);
+   // public ResponseEntity<GlobalDTO<TalentDetailResponseDTO>> createTalent(
+   //       @RequestPart("data") CreateTalentRequestDTO request,
+   //       @RequestPart(value = "talentPhotoFile", required = false) MultipartFile talentPhotoFile,
+   //       @RequestPart(value = "cvFile", required = false) MultipartFile cvFile) {
+   //    try {
+   //       return talentService.createTalent(request, talentPhotoFile, cvFile);
+   //    } catch (ErrorWithStatusException err) {
+   //       GlobalDTO<TalentDetailResponseDTO> response = new GlobalDTO<TalentDetailResponseDTO>();
+   //       response.setError(err.getStatus().getReasonPhrase());
+   //       response.setStatus(err.getStatus().value());
+   //       response.setMessage(err.getMessage());
+   //       return ResponseEntity.status(err.getStatus()).body(response);
+   //    }
    // }
 
    // @PostMapping(path = { "/book-recipes" }, consumes = {

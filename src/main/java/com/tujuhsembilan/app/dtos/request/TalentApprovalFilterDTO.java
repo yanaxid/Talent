@@ -18,7 +18,7 @@ public class TalentApprovalFilterDTO {
 
    
    private String agencyName;
-   private LocalDate requestDate;
+   private String requestDate;
    private String talentRequestStatus;
 
 }

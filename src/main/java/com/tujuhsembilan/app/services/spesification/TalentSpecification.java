@@ -11,6 +11,7 @@ import com.tujuhsembilan.app.models.Talent;
 import com.tujuhsembilan.app.models.TalentLevel;
 import com.tujuhsembilan.app.models.TalentStatus;
 
+import jakarta.persistence.criteria.Expression;
 import jakarta.persistence.criteria.Join;
 import jakarta.persistence.criteria.Predicate;
 import lombok.extern.slf4j.Slf4j;
@@ -61,6 +62,42 @@ public class TalentSpecification {
                   criteriaBuilder.lower(talentEmployeeJoin.get("employeeStatusName")),
                   filter.getEmployeeStatus().toLowerCase()));
          }
+
+         // --> serch
+         if (filter.getKeyword() != null) {
+
+            String keyword = "%" + filter.getKeyword().toLowerCase() + "%";
+
+            predicates.add(criteriaBuilder.like(
+                  criteriaBuilder.lower(root.get("talentName")), keyword));
+         }
+
+         // // --> search
+         // if (filter.getKeyword() != null && !filter.getKeyword().isEmpty()) {
+         // String keyword = filter.getKeyword().toLowerCase();
+
+         // // Full-text search using to_tsvector and to_tsquery
+         // Expression<String> ftsVector = criteriaBuilder.function("to_tsvector",
+         // String.class,
+         // criteriaBuilder.literal("english"), root.get("talentName"));
+         // Expression<Boolean> ftsMatch = criteriaBuilder.function("to_tsquery",
+         // Boolean.class,
+         // criteriaBuilder.literal("english"), criteriaBuilder.literal(keyword));
+         // predicates.add(criteriaBuilder.isTrue(ftsMatch));
+         // }
+
+         // --> search
+         // if (filter.getKeyword() != null && !filter.getKeyword().isEmpty()) {
+         // String keyword = filter.getKeyword().toLowerCase();
+
+         // // Full-text search using to_tsvector and to_tsquery
+         // Expression<Boolean> ftsMatch = criteriaBuilder.function(
+         // "to_tsvector", String.class, criteriaBuilder.literal("english"),
+         // root.get("talentName"))
+         // .in(criteriaBuilder.function("to_tsquery", String.class,
+         // criteriaBuilder.literal("english"), criteriaBuilder.literal(keyword)));
+         // predicates.add(criteriaBuilder.isTrue(ftsMatch));
+         // }
 
          return criteriaBuilder.and(predicates.toArray(new Predicate[predicates.size()]));
       };

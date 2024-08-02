@@ -49,17 +49,17 @@ public class Talent {
    private UUID talentId;
 
    @ManyToOne(fetch = FetchType.LAZY)
-   @BatchSize(size = 10)
+   // @BatchSize(size = 10)
    @JoinColumn(name = "talent_level_id")
    private TalentLevel talentLevel;
 
    @ManyToOne(fetch = FetchType.LAZY)
-   @BatchSize(size = 10)
+   // @BatchSize(size = 10)
    @JoinColumn(name = "talent_status_id")
    private TalentStatus talentStatus;
 
    @ManyToOne(fetch = FetchType.LAZY)
-   @BatchSize(size = 10)
+   // @BatchSize(size = 10)
    @JoinColumn(name = "employee_status_id")
    private EmployeeStatus employeeStatus;
 
@@ -114,7 +114,6 @@ public class Talent {
 
    // --> relation
    @OneToOne(mappedBy = "talent", fetch = FetchType.LAZY)
-   @BatchSize(size = 10)
    private TalentMetadata talentMetadata;
 
    @OneToMany(mappedBy = "talent", fetch = FetchType.LAZY)
@@ -122,7 +121,6 @@ public class Talent {
    private List<TalentPosition> talentPositions;
 
    @OneToMany(mappedBy = "talent", fetch = FetchType.LAZY)
-   @BatchSize(size = 10)
    private List<TalentWishlist> talentWishlists;
 
    @OneToMany(mappedBy = "talent", fetch = FetchType.LAZY)

@@ -13,7 +13,7 @@ import lombok.NoArgsConstructor;
 
 public class TalentFilterDTO {
 
-   
+   private String keyword;
    private String talentLevel;
    private Integer talentExperience;
    private String talentStatus;

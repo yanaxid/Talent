@@ -4,6 +4,7 @@ import java.util.UUID;
 
 import org.hibernate.annotations.BatchSize;
 import org.springframework.data.jpa.domain.support.AuditingEntityListener;
+import org.springframework.data.jpa.repository.EntityGraph;
 
 import jakarta.persistence.Column;
 import jakarta.persistence.Embedded;
@@ -28,6 +29,7 @@ import lombok.NoArgsConstructor;
 @EntityListeners(AuditingEntityListener.class)
 
 @Table(name = "talent_metadata")
+
 public class TalentMetadata {
 
    @Id

@@ -34,6 +34,7 @@ public class TalentPosition {
    @Id
    @ManyToOne(fetch = FetchType.LAZY)
    @JoinColumn(name = "position_id")
+   // @BatchSize(size = 10)
    private Position position;
 
 

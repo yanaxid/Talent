@@ -69,14 +69,14 @@ spring:
    datasource:
       #URL EXTERNAL
       # url: jdbc:postgresql://cloudias79.com:5545/new_db_talentcenter
-      url: jdbc:postgresql://10.10.5.180:5432/new_db_talentcenter
-      # url: jdbc:postgresql://localhost:5432/talent_center
+      # url: jdbc:postgresql://10.10.5.180:5432/new_db_talentcenter
+      url: jdbc:postgresql://localhost:5432/talent_center
 
-      username: usrtalentcenter
-      password: m1QVs3zKymgPduz
+      # username: usrtalentcenter
+      # password: m1QVs3zKymgPduz
 
-      # username: postgres
-      # password: root
+      username: postgres
+      password: root
 
 
       driverClassName: org.postgresql.Driver
@@ -87,16 +87,35 @@ spring:
       properties: 
          hibernate:
             dialect: org.hibernate.dialect.PostgreSQLDialect
-            format-sql: true
-            use-sql-comments: true
+            # default-batch-fetch-size: 10
+            # enable-lazy-load-no-trans: true
+            # format-sql: true
+            # use-sql-comments: true
+      # open-in-view: false    
+
+# spring.jpa.open-in-view=false
+# spring.jpa.properties.hibernate.enable_lazy_load_no_trans=true
+            # spring.jpa.properties.hibernate.default_batch_fetch_size=10
            
   
-logging:
-  level:
-    org:
-      hibernate:
-        SQL: ERROR
-        type:
-          descriptor:
-            sql:
-              BasicBinder: TRACE
+# logging:
+#   level:
+#     org:
+#       hibernate:
+#         SQL: ERROR
+#         type:
+#           descriptor:
+#             sql:
+#               BasicBinder: TRACE
+
+
+#-----------------------------------
+--- # Minio
+#-----------------------------------
+
+application: 
+   minio:
+      url: https://minio.cloudias79.com/
+      username: devtalentcenter
+      password: as4Dx6L4Uf1zFkyy
+      bucket-name: talent-center-app

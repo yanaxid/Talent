@@ -29,18 +29,6 @@ public class TalentApprovalSpesicication {
 
          List<Predicate> predicates = new ArrayList<Predicate>();
 
-         // --> agency name
-         // if (filter.getAgencyName() != null && !filter.getAgencyName().isEmpty()) {
-
-         // Join<TalentRequest, TalentWishlist> wishlistJoin =
-         // root.join("talentWishlist");
-         // Join<TalentWishlist, Client> clientJoin = wishlistJoin.join("client");
-
-         // predicates.add(criteriaBuilder.equal(
-         // criteriaBuilder.lower(clientJoin.get("agencyName")),
-         // filter.getAgencyName().toLowerCase()));
-         // }
-
          // --> aproval status
          if (filter.getTalentRequestStatus() != null && !filter.getTalentRequestStatus().isEmpty()) {
             Join<TalentRequest, TalentRequestStatus> TalentRequestJoin = root.join("talentRequestStatus");
@@ -49,22 +37,20 @@ public class TalentApprovalSpesicication {
                   filter.getTalentRequestStatus().toLowerCase()));
          }
 
-         // --> aproval status
-         // if (filter.getRequestDate() != null) {
-
-         log.info("----------------> BEFORE " + filter.getRequestDate());
-
-         // // String a = "%" + filter.getRequestDate() + "%";
-
-         log.info("----------------> AFTER " + root.get("requestDate"));
-         // predicates.add(criteriaBuilder.equal(
-         // root.get("requestDate"),
-         // filter.getRequestDate()));
-         // }
-
          if (filter.getRequestDate() != null) {
-            predicates.add(criteriaBuilder.equal(root.get("requestDate"), filter.getRequestDate()));
+            String requestDate = "%" + filter.getRequestDate().toLowerCase() + "%";
+
+            predicates.add(criteriaBuilder.like(
+                  criteriaBuilder.function("TO_CHAR", String.class,
+                        root.get("requestDate"),
+                        criteriaBuilder.literal("YYYY-MM-DD")),
+                  requestDate
+
+            ));
+
          }
+
+         
 
          return criteriaBuilder.and(predicates.toArray(new Predicate[predicates.size()]));
       };

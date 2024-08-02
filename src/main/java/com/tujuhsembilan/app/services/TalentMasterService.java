@@ -56,8 +56,8 @@ public class TalentMasterService {
    @Autowired
    private TalentRequestRepository talentRequestRepository;
 
-   // @Autowired
-   // private MinioService minioService;
+   @Autowired
+   private MinioService minioService;
 
    @Autowired
    private MessageUtil messageUtil;
@@ -93,7 +93,7 @@ public class TalentMasterService {
 
       for (Skillset s : skillsets) {
          skillsetResponseDTOs
-               .add(new SkillsetResponseDTO(s.getSkillsetId(),s.getSkillsetName()));
+               .add(new SkillsetResponseDTO(s.getSkillsetId(), s.getSkillsetName()));
       }
       return ResponseEntity.ok(skillsetResponseDTOs);
    }
@@ -111,162 +111,112 @@ public class TalentMasterService {
       return ResponseEntity.ok(positionResponseDTOs);
    }
 
+   // --> post :: save data talent
+   @Transactional
+   public ResponseEntity<?> saveDataTalent(
+         TalentRequestDTO request,
+         MultipartFile photoFile,
+         MultipartFile cvFile) {
+
+      // --> image
+      String imageFilename;
+
+      try {
+         imageFilename = minioService.uploadImageToMinio(request, photoFile);
+      } catch (IOException e) {
+         String errorMessage = messageUtil.get("application.error.upload.minio");
+         log.info("error minio -----!!!!");
+         log.error(errorMessage, e);
+         throw new MinioUploadException(errorMessage, e);
+      }
+
+      Talent talent = Talent.builder()
+            .talentLevel(request.getTalentLevel())
+            .talentStatus(null)
+            .employeeStatus(null)
+            .talentName(request.getTalentName())
+            .talentPhotoFilename(imageFilename)
+            .employeeNumber("0189")
+            .gender(request.getSex())
+            .birthDate(request.getDob())
+            .talentDescription(request.getTalentDescription())
+            .talentCvFilename("cv")
+            .talentExperience(request.getTalentExperience())
+            .email(request.getEmail())
+            .cellphone(request.getCellphone())
+            .biographyVideoUrl(request.getVideoUrl())
+            .isAddToListEnable(null)
+            .talentAvailability(null)
+            .build();
+
+      talentRepository.save(talent);
+
+      // String responseMessage = messageUtil.get("application.success.add.resep");
+      // int statusCode = HttpStatus.OK.value();
+      // String status = HttpStatus.OK.getReasonPhrase();
+
+      // log.info(responseMessage, statusCode, status);
+
+      return ResponseEntity.ok(talent);
+   }
+
+   // public MessageResponse create(CreateRecipeRequest request, MultipartFile
+   // imageFile, int userId) {
+
+   // validationService.validate(request);
+
+   // Users createdByUser = usersRepository.findById(userId)
+   // .orElseThrow(() -> new EntityNotFoundException(
+   // messageUtil.get("application.error.user.not-found", userId)));
+
+   // Categories categories =
+   // categoriesRepository.findById(request.getCategories().getCategoryId())
+   // .orElseThrow(() -> new EntityNotFoundException(
+   // messageUtil.get("application.error.category.not-found",
+   // request.getCategories().getCategoryId())));
+
+   // Levels levels = levelsRepository.findById(request.getLevels().getLevelId())
+   // .orElseThrow(() -> new EntityNotFoundException(
+   // messageUtil.get("application.error.level.not-found",
+   // request.getLevels().getLevelId())));
+
+   // String imageFilename;
+   // try {
+   // imageFilename = minioService.uploadImageToMinio(request, imageFile);
+   // } catch (IOException e) {
+   // String errorMessage = messageUtil.get("application.error.upload.minio");
+   // log.error(errorMessage, e);
+   // throw new MinioUploadException(errorMessage, e);
+   // }
+
+   // log.info(imageFilename);
+
+   // Recipes newRecipe = Recipes.builder()
+   // .users(createdByUser)
+   // .categories(categories)
+   // .levels(levels)
+   // .recipeName(request.getRecipeName())
+   // .imageFilename(imageFilename)
+   // .timeCook(request.getTimeCook())
+   // .ingredient(request.getIngredient())
+   // .howToCook(request.getHowToCook())
+   // .createdBy(createdByUser.getUsername())
+   // .modifiedBy(createdByUser.getUsername())
+   // .isDeleted(false)
+   // .createdTime(new Timestamp(System.currentTimeMillis()))
+   // .modifiedTime(new Timestamp(System.currentTimeMillis()))
+   // .build();
+
+   // recipesRepository.save(newRecipe);
+
+   // String responseMessage = messageUtil.get("application.success.add.resep",
+   // request.getRecipeName());
+   // int statusCode = HttpStatus.OK.value();
+   // String status = HttpStatus.OK.getReasonPhrase();
 
+   // log.info(responseMessage, statusCode, status);
 
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-// 
-// --> post :: save data talent
-// @Transactional
-// public ResponseEntity<?> saveDataTalent(TalentRequestDTO request, MultipartFile imageFile) {
-
-//    //--> image
-
-//    String imageFilename;
-//       try {
-//          imageFilename = minioService.uploadImageToMinio(request, imageFile);
-//       } catch (IOException e) {
-//          String errorMessage = messageUtil.get("application.error.upload.minio");
-//          log.info("error minio -----!!!!");
-//          log.error(errorMessage, e);
-//          throw new MinioUploadException(errorMessage, e);
-//       }
-
-
-//    Talent talent = Talent.builder()
-//       .talentLevel(request.getTalentLevel())
-//       .talentStatus(null)
-//       .employeeStatus(null)
-//       .talentName(request.getTalentName())
-//       .talentPhotoFilename(imageFilename)
-//       .employeeNumber("0189")
-//       .gender(request.getSex())
-//       .birthDate(request.getDob())
-//       .talentDescription(request.getTalentDescription())
-//       .talentCvFilename("cv")
-//       .talentExperience(request.getTalentExperience())
-//       .email(request.getEmail())
-//       .cellphone(request.getCellphone())
-//       .biographyVideoUrl(request.getVideoUrl())
-//       .isAddToListEnable(null)
-//       .talentAvailability(null)
-//       .build();
-
-
-//    talentRepository.save(talent);
-
-
-//    // String responseMessage = messageUtil.get("application.success.add.resep");
-//    //       int statusCode = HttpStatus.OK.value();
-//    //       String status = HttpStatus.OK.getReasonPhrase();
-   
-//    //       log.info(responseMessage, statusCode, status);
-  
-//    return ResponseEntity.ok(talent);
-// }
-
-
-
-
-//    public MessageResponse create(CreateRecipeRequest request, MultipartFile imageFile, int userId) {
-
-//       validationService.validate(request);
-
-//       Users createdByUser = usersRepository.findById(userId)
-//             .orElseThrow(() -> new EntityNotFoundException(
-//                   messageUtil.get("application.error.user.not-found", userId)));
-
-//       Categories categories = categoriesRepository.findById(request.getCategories().getCategoryId())
-//             .orElseThrow(() -> new EntityNotFoundException(
-//                   messageUtil.get("application.error.category.not-found",
-//                         request.getCategories().getCategoryId())));
-
-//       Levels levels = levelsRepository.findById(request.getLevels().getLevelId())
-//             .orElseThrow(() -> new EntityNotFoundException(
-//                   messageUtil.get("application.error.level.not-found", request.getLevels().getLevelId())));
-
-//       String imageFilename;
-//       try {
-//          imageFilename = minioService.uploadImageToMinio(request, imageFile);
-//       } catch (IOException e) {
-//          String errorMessage = messageUtil.get("application.error.upload.minio");
-//          log.error(errorMessage, e);
-//          throw new MinioUploadException(errorMessage, e);
-//       }
-
-//       log.info(imageFilename);
-
-//       Recipes newRecipe = Recipes.builder()
-//             .users(createdByUser)
-//             .categories(categories)
-//             .levels(levels)
-//             .recipeName(request.getRecipeName())
-//             .imageFilename(imageFilename)
-//             .timeCook(request.getTimeCook())
-//             .ingredient(request.getIngredient())
-//             .howToCook(request.getHowToCook())
-//             .createdBy(createdByUser.getUsername())
-//             .modifiedBy(createdByUser.getUsername())
-//             .isDeleted(false)
-//             .createdTime(new Timestamp(System.currentTimeMillis()))
-//             .modifiedTime(new Timestamp(System.currentTimeMillis()))
-//             .build();
-
-//       recipesRepository.save(newRecipe);
-
-//       String responseMessage = messageUtil.get("application.success.add.resep", request.getRecipeName());
-//       int statusCode = HttpStatus.OK.value();
-//       String status = HttpStatus.OK.getReasonPhrase();
-
-//       log.info(responseMessage, statusCode, status);
-
-//       return new MessageResponse(responseMessage, statusCode, status);
-//    }
-
-
-
+   // return new MessageResponse(responseMessage, statusCode, status);
+   // }
 
 }

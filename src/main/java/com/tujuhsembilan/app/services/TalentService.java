@@ -1,8 +1,10 @@
 package com.tujuhsembilan.app.services;
 
 import java.text.MessageFormat;
+import java.util.Collections;
 import java.util.List;
 import java.util.Locale;
+import java.util.Map;
 import java.util.Optional;
 import java.util.UUID;
 import java.util.stream.Collectors;
@@ -108,9 +110,29 @@ public class TalentService {
       }
 
       Specification<Talent> spec = TalentSpecification.filter(request);
-      log.info("try +++++++++++++++++++++++++++++++++++++++++++++");
+      log.info("START >>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>");
 
       Page<Talent> talents = talentRepository.findAll(spec, pageable);
+
+      List<UUID> talentIds = talents.stream().map(Talent::getTalentId).collect(Collectors.toList());
+
+      List<Object[]> allPositions = talentRepository.findPositionsByTalentIds(talentIds);
+      List<Object[]> allSkillsets = talentRepository.findSkillsetsByTalentIds(talentIds);
+
+      // Kelompokkan posisi dan skillsets berdasarkan talentId
+      Map<UUID, List<PositionResponseDTO>> positionsMap = allPositions.stream()
+            .collect(Collectors.groupingBy(
+                  row -> (UUID) row[2],
+                  Collectors.mapping(
+                        row -> new PositionResponseDTO((UUID) row[0], (String) row[1]),
+                        Collectors.toList())));
+
+      Map<UUID, List<SkillsetResponseDTO>> skillsetsMap = allSkillsets.stream()
+            .collect(Collectors.groupingBy(
+                  row -> (UUID) row[2],
+                  Collectors.mapping(
+                        row -> new SkillsetResponseDTO((UUID) row[0], (String) row[1]),
+                        Collectors.toList())));
 
       List<TalentResponseDTO> talentResponseDTOs = talents.stream().map(
             t -> {
@@ -126,24 +148,30 @@ public class TalentService {
                response.setTalentExperience(t.getTalentExperience());
                response.setTalentLevel(t.getTalentLevel() != null ? t.getTalentLevel().getTalentLevelName() : null);
 
-               // --> most efective
-               // --> mendapatkan PositionResponseDTO
-               List<PositionResponseDTO> positions = t.getTalentPositions().stream()
-                     .map(tp -> new PositionResponseDTO(tp.getPosition().getPositionId(),
-                           tp.getPosition().getPositionName()))
-                     .collect(Collectors.toList());
+               // // --> most efective
+               // // --> mendapatkan PositionResponseDTO
+               // List<PositionResponseDTO> positions = t.getTalentPositions().stream()
+               // .map(tp -> new PositionResponseDTO(tp.getPosition().getPositionId(),
+               // tp.getPosition().getPositionName()))
+               // .collect(Collectors.toList());
 
-               // List<PositionResponseDTO> positions = talentRepository.findPositionsByTalentId(t.getTalentId());
-               response.setPositions(positions);
+               // // List<PositionResponseDTO> positions =
+               // // talentRepository.findPositionsByTalentId(t.getTalentId());
+               // response.setPositions(positions);
 
-               // --> mendapatkan SkillsetResponseDTO
-               List<SkillsetResponseDTO> skillsets = t.getTalentSkillsets().stream()
-                     .map(ts -> new SkillsetResponseDTO(ts.getSkillset().getSkillsetId(),
-                           ts.getSkillset().getSkillsetName()))
-                     .collect(Collectors.toList());
+               // // --> mendapatkan SkillsetResponseDTO
+               // List<SkillsetResponseDTO> skillsets = t.getTalentSkillsets().stream()
+               // .map(ts -> new SkillsetResponseDTO(ts.getSkillset().getSkillsetId(),
+               // ts.getSkillset().getSkillsetName()))
+               // .collect(Collectors.toList());
 
-               // List<SkillsetResponseDTO> skillsets = talentRepository.findSkillsetsByTalentId(t.getTalentId());
-               response.setSkillsets(skillsets);
+               // // List<SkillsetResponseDTO> skillsets =
+               // // talentRepository.findSkillsetsByTalentId(t.getTalentId());
+               // response.setSkillsets(skillsets);
+
+               // Set positions and skillsets
+               response.setPositions(positionsMap.getOrDefault(t.getTalentId(), Collections.emptyList()));
+               response.setSkillsets(skillsetsMap.getOrDefault(t.getTalentId(), Collections.emptyList()));
 
                return response;
             }).collect(Collectors.toList());
@@ -154,75 +182,74 @@ public class TalentService {
       return ResponseEntity.ok(talentResponseDTOs);
    }
 
+   // public Page<Talent> searchTalents(String query, Pageable pageable) {
+   // return talentRepository.searchByFullText(query, pageable);
+   // }
+
    // --> GET :: talent detail
    // @Cacheable("talents")
-   // public ResponseEntity<?> getTalentById(UUID talentId) {
+   public ResponseEntity<?> getTalentById(UUID talentId) {
 
-   // log.info("start ----------------------> ");
+      log.info("start ----------------------> ");
 
-   // Optional<Talent> talentOPT = talentRepository.findById(talentId);
+      Optional<Talent> talentOPT = talentRepository.findById(talentId);
 
-   // if (talentOPT.isEmpty()) {
-   // String message = messageSource.getMessage("talent.not.found", null,
-   // Locale.getDefault());
-   // String formatMessage = MessageFormat.format(message, talentId);
-   // return ResponseEntity
-   // .status(HttpStatus.NOT_FOUND)
-   // .body(new NotFoundResponse(formatMessage, HttpStatus.NOT_FOUND.value(),
-   // HttpStatus.NOT_FOUND.getReasonPhrase()));
-   // }
+      if (talentOPT.isEmpty()) {
+         String message = messageSource.getMessage("talent.not.found", null,
+               Locale.getDefault());
+         String formatMessage = MessageFormat.format(message, talentId);
+         return ResponseEntity
+               .status(HttpStatus.NOT_FOUND)
+               .body(new NotFoundResponse(formatMessage, HttpStatus.NOT_FOUND.value(),
+                     HttpStatus.NOT_FOUND.getReasonPhrase()));
+      }
 
-   // TalentDetailResponseDTO td = new TalentDetailResponseDTO();
+      TalentDetailResponseDTO td = new TalentDetailResponseDTO();
 
-   // td.setTalentId(talentOPT.get().getTalentId());
-   // td.setTalentPhoto(talentOPT.get().getTalentPhotoFilename());
-   // td.setTalentName(talentOPT.get().getTalentName());
-   // td.setTalentStatus(
-   // talentOPT.get().getTalentStatus() != null ?
-   // talentOPT.get().getTalentStatus().getTalentStatusName() : null);
-   // td.setNip(talentOPT.get().getEmployeeNumber());
-   // td.setSex(talentOPT.get().getGender());
-   // td.setDob(talentOPT.get().getBirthDate());
-   // td.setTalentDescription(talentOPT.get().getTalentDescription());
-   // td.setCv(talentOPT.get().getTalentCvFilename());
-   // td.setTalentExperience(talentOPT.get().getTalentExperience());
-   // td.setTalentLevel(
-   // talentOPT.get().getTalentLevel() != null ?
-   // talentOPT.get().getTalentLevel().getTalentLevelName() : null);
-   // td.setProjectCompleted(talentOPT.get().getTalentMetadata() != null
-   // ? talentOPT.get().getTalentMetadata().getTotalProjectCompleted()
-   // : null);
+      td.setTalentId(talentOPT.get().getTalentId());
+      td.setTalentPhoto(talentOPT.get().getTalentPhotoFilename());
+      td.setTalentName(talentOPT.get().getTalentName());
+      td.setTalentStatus(
+            talentOPT.get().getTalentStatus() != null ? talentOPT.get().getTalentStatus().getTalentStatusName() : null);
+      td.setNip(talentOPT.get().getEmployeeNumber());
+      td.setSex(talentOPT.get().getGender());
+      td.setDob(talentOPT.get().getBirthDate());
+      td.setTalentDescription(talentOPT.get().getTalentDescription());
+      td.setCv(talentOPT.get().getTalentCvFilename());
+      td.setTalentExperience(talentOPT.get().getTalentExperience());
+      td.setTalentLevel(
+            talentOPT.get().getTalentLevel() != null ? talentOPT.get().getTalentLevel().getTalentLevelName() : null);
+      td.setProjectCompleted(talentOPT.get().getTalentMetadata() != null
+            ? talentOPT.get().getTalentMetadata().getTotalProjectCompleted()
+            : null);
 
-   // td.setTotalRequested(talentRequestRepository.countRequestsByTalentId(talentId));
+      td.setTotalRequested(talentRequestRepository.countRequestsByTalentId(talentId));
 
-   // // --> mendapatkan PositionResponseDTO
-   // List<PositionResponseDTO> positions =
-   // talentOPT.get().getTalentPositions().stream()
-   // .map(tp -> new PositionResponseDTO(tp.getPosition().getPositionId(),
-   // tp.getPosition().getPositionName()))
-   // .collect(Collectors.toList());
-   // // td.setPositions(positions);
-   // td.setPosition(positions.isEmpty() ? null : positions);
+      // --> mendapatkan PositionResponseDTO
+      List<PositionResponseDTO> positions = talentOPT.get().getTalentPositions().stream()
+            .map(tp -> new PositionResponseDTO(tp.getPosition().getPositionId(),
+                  tp.getPosition().getPositionName()))
+            .collect(Collectors.toList());
+      // td.setPositions(positions);
+      td.setPosition(positions.isEmpty() ? null : positions);
 
-   // td.setPosition(positions.isEmpty() ? null : positions);
+      td.setPosition(positions.isEmpty() ? null : positions);
 
-   // // --> mendapatkan SkillsetResponseDTO
-   // List<SkillsetResponseDTO> skillsets =
-   // talentOPT.get().getTalentSkillsets().stream()
-   // .map(ts -> new SkillsetResponseDTO(ts.getSkillset().getSkillsetId(),
-   // ts.getSkillset().getSkillsetName()))
-   // .collect(Collectors.toList());
-   // td.setSkillSet(skillsets.isEmpty() ? null : skillsets);
+      // --> mendapatkan SkillsetResponseDTO
+      List<SkillsetResponseDTO> skillsets = talentOPT.get().getTalentSkillsets().stream()
+            .map(ts -> new SkillsetResponseDTO(ts.getSkillset().getSkillsetId(),
+                  ts.getSkillset().getSkillsetName()))
+            .collect(Collectors.toList());
+      td.setSkillSet(skillsets.isEmpty() ? null : skillsets);
 
-   // td.setEmail(talentOPT.get().getEmail());
-   // td.setCellphone(talentOPT.get().getCellphone());
-   // td.setEmployeeStatus(
-   // talentOPT.get().getEmployeeStatus() != null ?
-   // talentOPT.get().getEmployeeStatus().getEmployeeStatusName()
-   // : null);
-   // td.setTalentAvailability(talentOPT.get().getTalentAvailability());
-   // td.setVideoUrl(talentOPT.get().getBiographyVideoUrl());
+      td.setEmail(talentOPT.get().getEmail());
+      td.setCellphone(talentOPT.get().getCellphone());
+      td.setEmployeeStatus(
+            talentOPT.get().getEmployeeStatus() != null ? talentOPT.get().getEmployeeStatus().getEmployeeStatusName()
+                  : null);
+      td.setTalentAvailability(talentOPT.get().getTalentAvailability());
+      td.setVideoUrl(talentOPT.get().getBiographyVideoUrl());
 
-   // return ResponseEntity.ok(td);
-   // }
+      return ResponseEntity.ok(td);
+   }
 }

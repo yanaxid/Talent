@@ -35,6 +35,7 @@ public class TalentSkillset {
    @Id
    @ManyToOne(fetch = FetchType.LAZY)
    @JoinColumn(name = "skillset_id")
+   // @BatchSize(size = 10)
    private Skillset skillset;
 
 

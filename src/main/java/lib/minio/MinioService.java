@@ -1,6 +1,5 @@
 package lib.minio;
 
-import com.tujuhsembilan.app.dtos.request.TalentRequestDTO;
 import io.minio.GetPresignedObjectUrlArgs;
 import io.minio.MinioClient;
 import io.minio.PutObjectArgs;
@@ -14,6 +13,8 @@ import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.web.multipart.MultipartFile;
+
+import com.tujuhsembilan.app.dtos.request.TalentRequestDTO;
 
 import java.io.IOException;
 import java.io.InputStream;
@@ -64,7 +65,6 @@ public class MinioService {
       return this.getLink(filename, DEFAULT_EXPIRY);
    }
 
-   // --> semua hurup dan angka kecuali caracter special
    private String sanitizeForFilename(String input) {
       return input.replaceAll("[^a-zA-Z0-9]", "_");
    }
@@ -74,30 +74,27 @@ public class MinioService {
       return (dotIndex == -1) ? "" : filename.substring(dotIndex);
    }
 
+   // --> upload image
    public String uploadImageToMinio(TalentRequestDTO request, MultipartFile imageFile) throws IOException {
+      String talentName = sanitizeForFilename(request.getRecipeName());
+      String categoryName = sanitizeForFilename(request.getCategories().getCategoryName());
+      String levelName = sanitizeForFilename(request.getLevels().getLevelName());
 
-      String talentName = sanitizeForFilename(request.getTalentName());
-      String talentExperiece = sanitizeForFilename(String.valueOf(request.getTalentExperience()));
-      String talentLevel = sanitizeForFilename(request.getTalentLevel().getTalentLevelName());
-
-      if (talentName.isEmpty() || talentExperiece.isEmpty() || talentLevel.isEmpty()) {
-         log.warn(
-               "One or more components for filename are empty. talentName: {}, TalentExperience: {}, TalentLevel: {}",
-               request.getTalentName(), request.getTalentExperience(),
-               request.getTalentLevel().getTalentLevelName());
+      if (recipeName.isEmpty() || categoryName.isEmpty() || levelName.isEmpty()) {
+         log.warn("One or more components for filename are empty. Recipe: {}, Category: {}, Level: {}",
+               request.getRecipeName(), request.getCategories().getCategoryName(),
+               request.getLevels().getLevelName());
       }
 
       String timestamp = String.valueOf(System.currentTimeMillis());
-
       String fileExtension = getFileExtension(imageFile.getOriginalFilename());
 
-      log.info("-----------> fileextention: " + fileExtension);
-
-      String generatedFilename = "%s_%s_%s_%s".formatted(
-            talentName,
-            talentExperiece,
-            talentLevel,
-            timestamp);
+      String generatedFilename = "%s_%s_%s_%s%s".formatted(
+            recipeName,
+            categoryName,
+            levelName,
+            timestamp,
+            fileExtension);
 
       try (InputStream inputStream = imageFile.getInputStream()) {
          minio.putObject(
@@ -115,40 +112,4 @@ public class MinioService {
       return generatedFilename;
    }
 
-   // public String updateImageToMinio(UpdateRecipeRequest request, MultipartFile imageFile) throws IOException {
-   //    String recipeName = sanitizeForFilename(request.getRecipeName());
-   //    String categoryName = sanitizeForFilename(request.getCategories().getCategoryName());
-   //    String levelName = sanitizeForFilename(request.getLevels().getLevelName());
-
-   //    if (recipeName.isEmpty() || categoryName.isEmpty() || levelName.isEmpty()) {
-   //       log.warn("One or more components for filename are empty. Recipe: {}, Category: {}, Level: {}",
-   //             request.getRecipeName(), request.getCategories().getCategoryName(),
-   //             request.getLevels().getLevelName());
-   //    }
-
-   //    String timestamp = String.valueOf(System.currentTimeMillis());
-   //    String fileExtension = getFileExtension(imageFile.getOriginalFilename());
-
-   //    String generatedFilename = "%s_%s_%s_%s%s".formatted(
-   //          recipeName,
-   //          categoryName,
-   //          levelName,
-   //          timestamp,
-   //          fileExtension);
-
-   //    try (InputStream inputStream = imageFile.getInputStream()) {
-   //       minio.putObject(
-   //             PutObjectArgs.builder()
-   //                   .bucket(prop.getBucketName())
-   //                   .object(generatedFilename)
-   //                   .stream(inputStream, imageFile.getSize(), -1)
-   //                   .contentType(imageFile.getContentType())
-   //                   .build());
-   //    } catch (Exception e) {
-   //       throw new IOException("Failed to upload image to MinIO", e);
-   //    }
-
-   //    log.info(generatedFilename);
-   //    return generatedFilename;
-   // }
 }
