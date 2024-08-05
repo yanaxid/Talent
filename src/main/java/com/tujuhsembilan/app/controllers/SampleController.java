@@ -28,46 +28,46 @@ import lombok.RequiredArgsConstructor;
 @RequiredArgsConstructor(onConstructor = @__(@Autowired))
 public class SampleController {
 
-  private final SampleRepository repo;
+   private final SampleRepository repo;
 
-  @GetMapping
-  public ResponseEntity<?> get(Pageable pagination) {
-    var result = repo.findAll(pagination);
-    var model = PagedModel.of(
-        result.getContent(),
-        new PagedModel.PageMetadata(
-            result.getSize(),
-            result.getNumber(),
-            result.getTotalElements(),
-            result.getTotalPages()));
-    return ResponseEntity.ok(model);
-  }
+   @GetMapping
+   public ResponseEntity<?> get(Pageable pagination) {
+      var result = repo.findAll(pagination);
+      var model = PagedModel.of(
+            result.getContent(),
+            new PagedModel.PageMetadata(
+                  result.getSize(),
+                  result.getNumber(),
+                  result.getTotalElements(),
+                  result.getTotalPages()));
+      return ResponseEntity.ok(model);
+   }
 
-  @PostMapping
-  public ResponseEntity<?> post(@RequestBody SampleModel body) {
-    return ResponseEntity.status(HttpStatus.CREATED).body(RepresentationModel.of(repo.save(body)));
-  }
+   @PostMapping
+   public ResponseEntity<?> post(@RequestBody SampleModel body) {
+      return ResponseEntity.status(HttpStatus.CREATED).body(RepresentationModel.of(repo.save(body)));
+   }
 
-  @PutMapping("/{id}")
-  public ResponseEntity<?> put(@PathVariable("id") String id, @RequestBody SampleModel body) {
-    var entity = repo.findById(UUID.fromString(id));
-    if (entity.isEmpty()) {
-      throw new EntityNotFoundException();
-    }
+   @PutMapping("/{id}")
+   public ResponseEntity<?> put(@PathVariable("id") String id, @RequestBody SampleModel body) {
+      var entity = repo.findById(UUID.fromString(id));
+      if (entity.isEmpty()) {
+         throw new EntityNotFoundException();
+      }
 
-    body.setId(entity.get().getId());
-    return ResponseEntity.status(HttpStatus.CREATED).body(RepresentationModel.of(repo.save(body)));
-  }
+      body.setId(entity.get().getId());
+      return ResponseEntity.status(HttpStatus.CREATED).body(RepresentationModel.of(repo.save(body)));
+   }
 
-  @DeleteMapping("/{id}")
-  public ResponseEntity<?> delete(@PathVariable("id") String id) {
-    var entity = repo.findById(UUID.fromString(id));
-    if (entity.isEmpty()) {
-      throw new EntityNotFoundException();
-    }
+   @DeleteMapping("/{id}")
+   public ResponseEntity<?> delete(@PathVariable("id") String id) {
+      var entity = repo.findById(UUID.fromString(id));
+      if (entity.isEmpty()) {
+         throw new EntityNotFoundException();
+      }
 
-    repo.delete(entity.get());
-    return ResponseEntity.ok().build();
-  }
+      repo.delete(entity.get());
+      return ResponseEntity.ok().build();
+   }
 
 }

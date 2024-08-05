@@ -113,7 +113,7 @@ spring:
 --- # Minio
 #-----------------------------------
 
-application: 
+application:
    minio:
       url: https://minio.cloudias79.com/
       username: devtalentcenter

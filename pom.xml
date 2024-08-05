@@ -134,6 +134,8 @@
 			<version>8.5.5</version>
 		</dependency>
 
+      
+
 		<!-- JSON:API for Spring HATEOAS -->
 		<dependency>
 			<groupId>com.toedter</groupId>

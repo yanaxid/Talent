@@ -5,6 +5,7 @@ import java.util.UUID;
 
 import org.springframework.data.jpa.domain.support.AuditingEntityListener;
 
+
 import jakarta.persistence.Column;
 import jakarta.persistence.Embedded;
 import jakarta.persistence.Entity;
@@ -40,11 +41,15 @@ public class TalentRequestStatus {
    @Size(max = 50)
    private String talentRequestStatusName;
 
+   @Column(name = "is_active")
+   private Boolean isActive;
+
    // --> creation
    @Embedded
    private Creation creation;
 
    //--> relation
+
    @OneToMany(mappedBy = "talentRequestStatus", fetch = FetchType.LAZY)
    private List<TalentRequest> talentRequests;
 

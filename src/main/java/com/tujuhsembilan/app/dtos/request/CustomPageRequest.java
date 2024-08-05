@@ -23,8 +23,9 @@ public class CustomPageRequest {
 
    // --> sort default
    public Pageable getPage(String defaultSort) {
-      int pageNumberValue = (page != null) ? (page < 1 ? 1 : page) : 1;
-      int pageSizeValue = (size != null) ? (size < 1 ? 1 : size) : 10;
+      //--> max page = 10 max size = 100 (for better performance)
+      int pageNumberValue = (page != null) ? (page < 1 ? 1 : (page > 10 ? 10 : page)) : 1;
+      int pageSizeValue = (size != null) ? (size < 1 ? 1 : (size > 100 ? 100 : size)) : 10;
       Sort sortBy = Sort.unsorted();
 
       if (sort != null && !sort.isEmpty()) {
@@ -37,19 +38,19 @@ public class CustomPageRequest {
    }
 
    // --> sort default with exteded sort after
-   public Pageable getPage(String defaultSort, String extendedSort) {
-      int pageNumberValue = (page != null) ? (page < 1 ? 1 : page) : 1;
-      int pageSizeValue = (size != null) ? (size < 1 ? 1 : size) : 10;
-      Sort sortBy = Sort.unsorted();
+   // public Pageable getPage(String defaultSort, String extendedSort) {
+   // int pageNumberValue = (page != null) ? (page < 1 ? 1 : page) : 1;
+   // int pageSizeValue = (size != null) ? (size < 1 ? 1 : size) : 10;
+   // Sort sortBy = Sort.unsorted();
 
-      if (sort != null && !sort.isEmpty()) {
-         sort += ";" + extendedSort;
-         sortBy = multipleSort(sortBy, sort);
-      } else {
-         sortBy = multipleSort(sortBy, defaultSort);
-      }
-      return PageRequest.of(pageNumberValue - 1, pageSizeValue, sortBy);
-   }
+   // if (sort != null && !sort.isEmpty()) {
+   // sort += ";" + extendedSort;
+   // sortBy = multipleSort(sortBy, sort);
+   // } else {
+   // sortBy = multipleSort(sortBy, defaultSort);
+   // }
+   // return PageRequest.of(pageNumberValue - 1, pageSizeValue, sortBy);
+   // }
 
    // --> multiple sort
    public Sort multipleSort(Sort sortBy, String defaultSort) {

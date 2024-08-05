@@ -1,14 +1,15 @@
 package com.tujuhsembilan.app.models;
 
-import org.hibernate.annotations.BatchSize;
+
 import org.springframework.data.jpa.domain.support.AuditingEntityListener;
 
+import jakarta.persistence.EmbeddedId;
 import jakarta.persistence.Entity;
 import jakarta.persistence.EntityListeners;
 import jakarta.persistence.FetchType;
-import jakarta.persistence.Id;
 import jakarta.persistence.JoinColumn;
 import jakarta.persistence.ManyToOne;
+import jakarta.persistence.MapsId;
 import jakarta.persistence.Table;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
@@ -22,23 +23,23 @@ import lombok.NoArgsConstructor;
 @Entity
 @EntityListeners(AuditingEntityListener.class)
 
-
 @Table(name = "talent_position")
 public class TalentPosition {
 
-   @Id
+   @EmbeddedId
+   private TalentPositionId id;
+
    @ManyToOne(fetch = FetchType.LAZY)
+   @MapsId("talentId")
    @JoinColumn(name = "talent_id")
    private Talent talent;
 
-   @Id
    @ManyToOne(fetch = FetchType.LAZY)
+   @MapsId("positionId")
    @JoinColumn(name = "position_id")
-   // @BatchSize(size = 10)
    private Position position;
 
-
-      //--> creation
+   // --> creation
    private Creation creation;
 
 }

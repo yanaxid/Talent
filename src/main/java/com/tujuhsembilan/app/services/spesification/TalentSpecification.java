@@ -11,7 +11,6 @@ import com.tujuhsembilan.app.models.Talent;
 import com.tujuhsembilan.app.models.TalentLevel;
 import com.tujuhsembilan.app.models.TalentStatus;
 
-import jakarta.persistence.criteria.Expression;
 import jakarta.persistence.criteria.Join;
 import jakarta.persistence.criteria.Predicate;
 import lombok.extern.slf4j.Slf4j;

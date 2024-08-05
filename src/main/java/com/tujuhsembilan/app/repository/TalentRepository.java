@@ -13,65 +13,33 @@ import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;
 import org.springframework.stereotype.Repository;
 
-import com.tujuhsembilan.app.dtos.response.TalentResponseDTO;
 import com.tujuhsembilan.app.models.Talent;
 
 @Repository
 public interface TalentRepository extends JpaRepository<Talent, UUID>, JpaSpecificationExecutor<Talent> {
 
-   // @EntityGraph(attributePaths = { "talentLevel","talentStatus","employeeStatus","talentMetadata" })
-   // Page<Talent> findAll(Specification<Talent> spec, Pageable pageable);
-
-   // @Query("SELECT new com.tujuhsembilan.app.dtos.response.TalentResponseDTO(" +
-   // "t.talentId, t.talentPhotoFilename, t.talentName," +
-   // "ts.talentStatusName, es.employeeStatusName, t.talentAvailability,
-   // t.talentExperience," +
-   // "tl.talentLevelName)" +
-   // "FROM Talent t " +
-   // "LEFT JOIN FETCH t.talentLevel tl " +
-   // "LEFT JOIN FETCH t.talentStatus ts " +
-   // "LEFT JOIN FETCH t.employeeStatus es ")
-   // Page<TalentResponseDTO> findT(Pageable page);
-
-   // -> not efectif when get 1000 data
-   // @Query("SELECT new
-   // com.tujuhsembilan.app.dtos.response.PositionResponseDTO(p.positionId,p.positionName)"
-   // +
-   // "FROM TalentPosition tp " +
-   // "JOIN tp.position p " +
-   // "WHERE tp.talent.talentId = :talentId")
-   // List<PositionResponseDTO> findPositionsByTalentId(@Param("talentId") UUID
-   // talentId);
-
-   // @Query("SELECT new
-   // com.tujuhsembilan.app.dtos.response.SkillsetResponseDTO(s.skillsetId,s.skillsetName)"
-   // + "FROM TalentSkillset ts " +
-   // "JOIN ts.skillset s " +
-   // "WHERE ts.talent.talentId = :talentId")
-   // List<SkillsetResponseDTO> findSkillsetsByTalentId(@Param("talentId") UUID
-   // talentId);
-
-   // @Query("SELECT new
-   // com.tujuhsembilan.app.dtos.response.PositionResponseDTO(tp.position.positionId,
-   // tp.position.positionName) " +
-   // "FROM TalentPosition tp WHERE tp.talent.talentId IN :talentIds")
-   // List<PositionResponseDTO> findPositionsByTalentIds(@Param("talentIds")
-   // List<UUID> talentIds);
-
-   // @Query("SELECT new
-   // com.tujuhsembilan.app.dtos.response.SkillsetResponseDTO(ts.skillset.skillsetId,
-   // ts.skillset.skillsetName) " +
-   // "FROM TalentSkillset ts WHERE ts.talent.talentId IN :talentIds")
-   // List<SkillsetResponseDTO> findSkillsetsByTalentIds(@Param("talentIds")
-   // List<UUID> talentIds);
+   // @EntityGraph(attributePaths = { "talentMetadata", "talentStatus", "talentLevel", "employeeStatus" })
+   @EntityGraph(attributePaths = { "talentMetadata"})
+   Page<Talent> findAll(Specification<Talent> spec, Pageable pageable);
 
    @Query("SELECT tp.position.positionId, tp.position.positionName, tp.talent.talentId " +
          "FROM TalentPosition tp WHERE tp.talent.talentId IN :talentIds")
    List<Object[]> findPositionsByTalentIds(@Param("talentIds") List<UUID> talentIds);
 
+
    @Query("SELECT ts.skillset.skillsetId, ts.skillset.skillsetName, ts.talent.talentId " +
          "FROM TalentSkillset ts WHERE ts.talent.talentId IN :talentIds")
    List<Object[]> findSkillsetsByTalentIds(@Param("talentIds") List<UUID> talentIds);
+
+
+   @Query("SELECT tp.position.positionId, tp.position.positionName, tp.talent.talentId " +
+           "FROM TalentPosition tp WHERE tp.talent.talentId = :talentId")
+    List<Object[]> findPositionsByTalentId(@Param("talentId") UUID talentId);
+
+    @Query("SELECT ts.skillset.skillsetId, ts.skillset.skillsetName, ts.talent.talentId " +
+           "FROM TalentSkillset ts WHERE ts.talent.talentId = :talentId")
+    List<Object[]> findSkillsetsByTalentId(@Param("talentId") UUID talentId);
+
 
    // @EntityGraph(attributePaths = { "talentLevel","talentStatus","employeeStatus","talentMetadata" })
    // @Query(value = "SELECT * FROM talent " +

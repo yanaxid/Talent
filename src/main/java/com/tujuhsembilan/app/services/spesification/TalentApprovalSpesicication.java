@@ -1,21 +1,15 @@
 package com.tujuhsembilan.app.services.spesification;
 
-import java.time.LocalDate;
-import java.time.format.DateTimeFormatter;
+
 import java.util.ArrayList;
 import java.util.List;
 
 import org.springframework.data.jpa.domain.Specification;
 
 import com.tujuhsembilan.app.dtos.request.TalentApprovalFilterDTO;
-import com.tujuhsembilan.app.models.Client;
-import com.tujuhsembilan.app.models.EmployeeStatus;
-import com.tujuhsembilan.app.models.Talent;
-import com.tujuhsembilan.app.models.TalentLevel;
 import com.tujuhsembilan.app.models.TalentRequest;
 import com.tujuhsembilan.app.models.TalentRequestStatus;
-import com.tujuhsembilan.app.models.TalentStatus;
-import com.tujuhsembilan.app.models.TalentWishlist;
+
 
 import jakarta.persistence.criteria.Join;
 import jakarta.persistence.criteria.Predicate;

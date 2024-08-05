@@ -5,12 +5,10 @@ import java.util.Collections;
 import java.util.List;
 import java.util.Locale;
 import java.util.Map;
-import java.util.Optional;
 import java.util.UUID;
 import java.util.stream.Collectors;
 
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.cache.annotation.Cacheable;
 import org.springframework.context.MessageSource;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
@@ -27,13 +25,13 @@ import com.tujuhsembilan.app.dtos.response.TalentDetailResponseDTO;
 import com.tujuhsembilan.app.dtos.response.TalentResponseDTO;
 import com.tujuhsembilan.app.models.Talent;
 import com.tujuhsembilan.app.repository.EmployeeStatusRepository;
-import com.tujuhsembilan.app.repository.SkillsetRepository;
 import com.tujuhsembilan.app.repository.TalentLevelRepository;
 import com.tujuhsembilan.app.repository.TalentRepository;
 import com.tujuhsembilan.app.repository.TalentRequestRepository;
 import com.tujuhsembilan.app.repository.TalentStatusRepository;
 import com.tujuhsembilan.app.services.spesification.TalentSpecification;
 
+import jakarta.persistence.EntityNotFoundException;
 import jakarta.transaction.Transactional;
 import lombok.extern.slf4j.Slf4j;
 
@@ -54,14 +52,17 @@ public class TalentService {
    @Autowired
    private TalentStatusRepository statusRepository;
 
-   @Autowired
-   private SkillsetRepository skillsetRepository;
+   // @Autowired
+   // private SkillsetRepository skillsetRepository;
 
    @Autowired
    private MessageSource messageSource;
 
    @Autowired
    private TalentRequestRepository talentRequestRepository;
+
+   // @Autowired
+   // private CacheManager cacheManager;
 
    // --> GET :: all talents
    // @Cacheable("talents")
@@ -110,7 +111,6 @@ public class TalentService {
       }
 
       Specification<Talent> spec = TalentSpecification.filter(request);
-      log.info("START >>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>");
 
       Page<Talent> talents = talentRepository.findAll(spec, pageable);
 
@@ -182,73 +182,67 @@ public class TalentService {
       return ResponseEntity.ok(talentResponseDTOs);
    }
 
-   // public Page<Talent> searchTalents(String query, Pageable pageable) {
-   // return talentRepository.searchByFullText(query, pageable);
-   // }
-
    // --> GET :: talent detail
-   // @Cacheable("talents")
+   // @Cacheable(value = "talent", key = "#talentId")
    public ResponseEntity<?> getTalentById(UUID talentId) {
 
-      log.info("start ----------------------> ");
+      log.info("START >>>> ");
 
-      Optional<Talent> talentOPT = talentRepository.findById(talentId);
+      Talent talent = talentRepository.findById(talentId)
+            .orElseThrow(() -> new EntityNotFoundException(talentId + " not found"));
 
-      if (talentOPT.isEmpty()) {
-         String message = messageSource.getMessage("talent.not.found", null,
-               Locale.getDefault());
-         String formatMessage = MessageFormat.format(message, talentId);
-         return ResponseEntity
-               .status(HttpStatus.NOT_FOUND)
-               .body(new NotFoundResponse(formatMessage, HttpStatus.NOT_FOUND.value(),
-                     HttpStatus.NOT_FOUND.getReasonPhrase()));
-      }
+
+      List<Object[]> allPositions = talentRepository.findPositionsByTalentId(talentId);
+      List<Object[]> allSkillsets = talentRepository.findSkillsetsByTalentId(talentId);
+
+      // Kelompokkan posisi berdasarkan talentId
+      Map<UUID, List<PositionResponseDTO>> positionsMap = allPositions.stream()
+            .map(row -> new PositionResponseDTO((UUID) row[0], (String) row[1]))
+            .collect(Collectors.groupingBy(row -> talentId)); // Gunakan talentId sebagai kunci
+
+      // Kelompokkan skillsets berdasarkan talentId
+      Map<UUID, List<SkillsetResponseDTO>> skillsetsMap = allSkillsets.stream()
+            .map(row -> new SkillsetResponseDTO((UUID) row[0], (String) row[1]))
+            .collect(Collectors.groupingBy(row -> talentId)); // Gunakan talentId sebagai kunci
 
       TalentDetailResponseDTO td = new TalentDetailResponseDTO();
 
-      td.setTalentId(talentOPT.get().getTalentId());
-      td.setTalentPhoto(talentOPT.get().getTalentPhotoFilename());
-      td.setTalentName(talentOPT.get().getTalentName());
+      td.setTalentId(talent.getTalentId());
+      td.setTalentPhoto(talent.getTalentPhotoFilename());
+      td.setTalentName(talent.getTalentName());
       td.setTalentStatus(
-            talentOPT.get().getTalentStatus() != null ? talentOPT.get().getTalentStatus().getTalentStatusName() : null);
-      td.setNip(talentOPT.get().getEmployeeNumber());
-      td.setSex(talentOPT.get().getGender());
-      td.setDob(talentOPT.get().getBirthDate());
-      td.setTalentDescription(talentOPT.get().getTalentDescription());
-      td.setCv(talentOPT.get().getTalentCvFilename());
-      td.setTalentExperience(talentOPT.get().getTalentExperience());
+            talent.getTalentStatus() != null ? talent.getTalentStatus().getTalentStatusName() : null);
+      td.setNip(talent.getEmployeeNumber());
+      td.setSex(talent.getGender());
+      td.setDob(talent.getBirthDate());
+      td.setTalentDescription(talent.getTalentDescription());
+      td.setCv(talent.getTalentCvFilename());
+      td.setTalentExperience(talent.getTalentExperience());
       td.setTalentLevel(
-            talentOPT.get().getTalentLevel() != null ? talentOPT.get().getTalentLevel().getTalentLevelName() : null);
-      td.setProjectCompleted(talentOPT.get().getTalentMetadata() != null
-            ? talentOPT.get().getTalentMetadata().getTotalProjectCompleted()
+            talent.getTalentLevel() != null ? talent.getTalentLevel().getTalentLevelName() : null);
+      td.setProjectCompleted(talent.getTalentMetadata() != null
+            ? talent.getTalentMetadata().getTotalProjectCompleted()
             : null);
 
       td.setTotalRequested(talentRequestRepository.countRequestsByTalentId(talentId));
 
-      // --> mendapatkan PositionResponseDTO
-      List<PositionResponseDTO> positions = talentOPT.get().getTalentPositions().stream()
-            .map(tp -> new PositionResponseDTO(tp.getPosition().getPositionId(),
-                  tp.getPosition().getPositionName()))
-            .collect(Collectors.toList());
-      // td.setPositions(positions);
-      td.setPosition(positions.isEmpty() ? null : positions);
+      td.setPosition(positionsMap.getOrDefault(talentId, Collections.emptyList()));
+      td.setSkillSet(skillsetsMap.getOrDefault(talentId, Collections.emptyList()));
 
-      td.setPosition(positions.isEmpty() ? null : positions);
+      // --> N+1 problem
+      // List<SkillsetResponseDTO> skillsets = talent.getTalentSkillsets().stream()
+      //       .map(ts -> new SkillsetResponseDTO(ts.getSkillset().getSkillsetId(),
+      //             ts.getSkillset().getSkillsetName()))
+      //       .collect(Collectors.toList());
+      // td.setSkillSet(skillsets.isEmpty() ? null : skillsets);
 
-      // --> mendapatkan SkillsetResponseDTO
-      List<SkillsetResponseDTO> skillsets = talentOPT.get().getTalentSkillsets().stream()
-            .map(ts -> new SkillsetResponseDTO(ts.getSkillset().getSkillsetId(),
-                  ts.getSkillset().getSkillsetName()))
-            .collect(Collectors.toList());
-      td.setSkillSet(skillsets.isEmpty() ? null : skillsets);
-
-      td.setEmail(talentOPT.get().getEmail());
-      td.setCellphone(talentOPT.get().getCellphone());
+      td.setEmail(talent.getEmail());
+      td.setCellphone(talent.getCellphone());
       td.setEmployeeStatus(
-            talentOPT.get().getEmployeeStatus() != null ? talentOPT.get().getEmployeeStatus().getEmployeeStatusName()
+            talent.getEmployeeStatus() != null ? talent.getEmployeeStatus().getEmployeeStatusName()
                   : null);
-      td.setTalentAvailability(talentOPT.get().getTalentAvailability());
-      td.setVideoUrl(talentOPT.get().getBiographyVideoUrl());
+      td.setTalentAvailability(talent.getTalentAvailability());
+      td.setVideoUrl(talent.getBiographyVideoUrl());
 
       return ResponseEntity.ok(td);
    }

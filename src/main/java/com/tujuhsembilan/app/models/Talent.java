@@ -2,15 +2,11 @@ package com.tujuhsembilan.app.models;
 
 import java.util.Date;
 import java.util.List;
-import java.util.Set;
 import java.util.UUID;
 
-import org.hibernate.FetchMode;
 import org.hibernate.annotations.BatchSize;
-import org.hibernate.annotations.Fetch;
 import org.springframework.data.jpa.domain.support.AuditingEntityListener;
 
-import com.fasterxml.jackson.annotation.JsonIgnore;
 
 import jakarta.persistence.CascadeType;
 import jakarta.persistence.Column;
@@ -21,14 +17,10 @@ import jakarta.persistence.FetchType;
 import jakarta.persistence.GeneratedValue;
 import jakarta.persistence.GenerationType;
 import jakarta.persistence.Id;
-import jakarta.persistence.Index;
 import jakarta.persistence.JoinColumn;
 import jakarta.persistence.ManyToOne;
-import jakarta.persistence.NamedAttributeNode;
-import jakarta.persistence.NamedEntityGraph;
 import jakarta.persistence.OneToMany;
 import jakarta.persistence.OneToOne;
-import jakarta.persistence.Table;
 import jakarta.validation.constraints.Size;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
@@ -76,6 +68,14 @@ public class Talent {
    @Column(length = 1)
    private Character gender;
 
+
+   @Column(name = "talent_cv_url")
+   private String talentCvUrl;
+ 
+   @Column(name = "talent_photo_url")
+   private String talentPhotoUrl;
+
+
    @Column(name = "birth_date")
    private Date birthDate;
 
@@ -84,6 +84,7 @@ public class Talent {
 
    @Column(name = "talent_cv_filename")
    private String talentCvFilename;
+
 
    @Column(name = "experience")
    private Integer talentExperience;
@@ -113,7 +114,7 @@ public class Talent {
    private Creation creation;
 
    // --> relation
-   @OneToOne(mappedBy = "talent", fetch = FetchType.LAZY)
+   @OneToOne(mappedBy = "talent", fetch = FetchType.LAZY, cascade = CascadeType.ALL)
    private TalentMetadata talentMetadata;
 
    @OneToMany(mappedBy = "talent", fetch = FetchType.LAZY)
