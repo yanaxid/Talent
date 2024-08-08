@@ -18,7 +18,7 @@ public class TalentFilterDTO {
    private String keyword;
    @Size(max = 50)
    private String talentLevel;
-   
+   @Size(max = 50)
    private Integer talentExperience;
    @Size(max = 50)
    private String talentStatus;

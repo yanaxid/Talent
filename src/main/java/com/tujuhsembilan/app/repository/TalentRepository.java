@@ -26,11 +26,9 @@ public interface TalentRepository extends JpaRepository<Talent, UUID>, JpaSpecif
          "FROM TalentPosition tp WHERE tp.talent.talentId IN :talentIds")
    List<Object[]> findPositionsByTalentIds(@Param("talentIds") List<UUID> talentIds);
 
-
    @Query("SELECT ts.skillset.skillsetId, ts.skillset.skillsetName, ts.talent.talentId " +
          "FROM TalentSkillset ts WHERE ts.talent.talentId IN :talentIds")
    List<Object[]> findSkillsetsByTalentIds(@Param("talentIds") List<UUID> talentIds);
-
 
    @Query("SELECT tp.position.positionId, tp.position.positionName, tp.talent.talentId " +
            "FROM TalentPosition tp WHERE tp.talent.talentId = :talentId")

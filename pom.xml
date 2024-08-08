@@ -6,7 +6,7 @@
 	<parent>
 		<groupId>org.springframework.boot</groupId>
 		<artifactId>spring-boot-starter-parent</artifactId>
-		<version>3.1.12</version>
+		<version>3.3.2</version>
 		<relativePath /> <!-- lookup parent from repository -->
 	</parent>
 
@@ -170,6 +170,19 @@
          <artifactId>caffeine</artifactId>
          <version>3.1.8</version>
       </dependency>
+
+
+      <!-- elstic search -->
+
+      <dependency>
+         <groupId>org.springframework.boot</groupId>
+         <artifactId>spring-boot-starter-data-elasticsearch</artifactId>
+      </dependency>
+
+    
+
+    
+     
 
 
 	</dependencies>

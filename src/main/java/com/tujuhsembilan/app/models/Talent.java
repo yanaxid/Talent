@@ -5,6 +5,7 @@ import java.util.List;
 import java.util.UUID;
 
 import org.hibernate.annotations.BatchSize;
+import org.springframework.data.elasticsearch.annotations.Document;
 import org.springframework.data.jpa.domain.support.AuditingEntityListener;
 
 
@@ -114,7 +115,7 @@ public class Talent {
    private Creation creation;
 
    // --> relation
-   @OneToOne(mappedBy = "talent", fetch = FetchType.LAZY, cascade = CascadeType.ALL)
+   @OneToOne(mappedBy = "talent", fetch = FetchType.LAZY)
    private TalentMetadata talentMetadata;
 
    @OneToMany(mappedBy = "talent", fetch = FetchType.LAZY)

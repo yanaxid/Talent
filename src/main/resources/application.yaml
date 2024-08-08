@@ -119,3 +119,20 @@ application:
       username: devtalentcenter
       password: as4Dx6L4Uf1zFkyy
       bucket-name: talent-center-app
+
+#-----------------------------------
+--- # Elastic Search
+#-----------------------------------
+
+spring:
+   elasticsearch:
+      uris: "http://localhost:9201"
+      socket-timeout: "10s"
+      username: "yanax"
+      password: "123456"
+     
+   main:
+      allow-bean-definition-overriding: true
+
+
+      

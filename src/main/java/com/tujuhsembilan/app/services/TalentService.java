@@ -8,6 +8,7 @@ import java.util.Map;
 import java.util.UUID;
 import java.util.stream.Collectors;
 
+// import org.hibernate.engine.jdbc.env.internal.LobCreationLogging_.logger;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.MessageSource;
 import org.springframework.data.domain.Page;
@@ -23,7 +24,9 @@ import com.tujuhsembilan.app.dtos.response.PositionResponseDTO;
 import com.tujuhsembilan.app.dtos.response.SkillsetResponseDTO;
 import com.tujuhsembilan.app.dtos.response.TalentDetailResponseDTO;
 import com.tujuhsembilan.app.dtos.response.TalentResponseDTO;
+import com.tujuhsembilan.app.elastic.TalentRepositoryElastic;
 import com.tujuhsembilan.app.models.Talent;
+import com.tujuhsembilan.app.models.Talent2;
 import com.tujuhsembilan.app.repository.EmployeeStatusRepository;
 import com.tujuhsembilan.app.repository.TalentLevelRepository;
 import com.tujuhsembilan.app.repository.TalentRepository;
@@ -42,6 +45,9 @@ public class TalentService {
 
    @Autowired
    private TalentRepository talentRepository;
+
+   @Autowired
+   private TalentRepositoryElastic talentRepositoryElastic;
 
    @Autowired
    private TalentLevelRepository talentLevelRepository;
@@ -64,6 +70,188 @@ public class TalentService {
    // @Autowired
    // private CacheManager cacheManager;
 
+
+   //--> FILTER
+   //level
+   //status
+   //exp
+   
+   //evel-status
+   //level-experience
+   //status-experience
+   
+   //level-status-experience
+   
+
+   public Page<Talent2> searchTalents(TalentFilterDTO filter, Pageable pageable) {
+
+      String tl = filter.getKeyword();
+      if (filter.getKeyword() == null || filter.getKeyword().isEmpty()) {
+         tl = "";
+      }
+
+       
+      //--> level
+      if (filter.getTalentLevel() != null && filter.getTalentExperience() == null && filter.getTalentStatus() ==  null) {
+         return talentRepositoryElastic.findLevel(tl.toLowerCase(), filter.getTalentLevel(), pageable);
+      } 
+      //--> status
+      else if (filter.getTalentLevel() == null && filter.getTalentExperience() == null && filter.getTalentStatus() !=  null) {
+         return talentRepositoryElastic.findStatus(tl.toLowerCase(), filter.getTalentStatus(), pageable);
+      } 
+      
+      // --> exp
+      else if (filter.getTalentLevel() == null && filter.getTalentExperience() != null && filter.getTalentStatus() ==  null) {
+         return findNameExp(filter, pageable);
+      }
+
+      //--> level-status
+      else if (filter.getTalentLevel() != null && filter.getTalentExperience() == null && filter.getTalentStatus() !=  null) {
+         return talentRepositoryElastic.findLevelStatus(tl.toLowerCase(), filter.getTalentLevel(), filter.getTalentStatus(), pageable);
+      }
+
+      //--> level-exp
+      else if (filter.getTalentLevel() != null && filter.getTalentExperience() != null && filter.getTalentStatus() ==  null ) {
+        return findNameLevelExp(filter, pageable);
+      }
+
+      //--> status-exp
+      else if (filter.getTalentLevel() == null && filter.getTalentExperience() != null && filter.getTalentStatus() !=  null ) {
+         return findNameStatusExp(filter, pageable);
+      }
+
+      //--> level-status-experience
+      else if (filter.getTalentLevel() != null && filter.getTalentStatus() != null && filter.getTalentExperience() != null) {
+         return findNameLevelStatusExp(filter, pageable);
+
+      }
+
+      // --> name
+      else {
+         return talentRepositoryElastic.searchByKeyword(tl.toLowerCase(), pageable);
+      }
+
+   }
+
+   public Page<Talent2> findNameExp(TalentFilterDTO filter, Pageable pageable){
+      // --> create category
+      String keyword = filter.getKeyword() != null ? filter.getKeyword().toLowerCase() : "";
+      int minExperience = 0;
+      int maxExperience = Integer.MAX_VALUE;
+
+      switch (filter.getTalentExperience()) {
+         case 0:
+            maxExperience = 1; // 0-1 tahun
+            break;
+         case 1:
+            minExperience = 2; // 2-4 tahun
+            maxExperience = 4;
+            break;
+         case 2:
+            minExperience = 5; // 5 tahun ke atas
+            break;
+         default:
+            minExperience = 0;
+            maxExperience = Integer.MAX_VALUE; // Semua kategori
+            break;
+      }
+
+      return talentRepositoryElastic.findExp(keyword, minExperience, maxExperience,
+            pageable);
+   }
+
+   public Page<Talent2> findNameLevelStatusExp(TalentFilterDTO filter, Pageable pageable){
+      String keyword = filter.getKeyword() != null ? filter.getKeyword().toLowerCase() : "";
+         int minExperience = 0;
+         int maxExperience = Integer.MAX_VALUE;
+
+         switch (filter.getTalentExperience()) {
+            case 0:
+               maxExperience = 1; // 0-1 tahun
+               break;
+            case 1:
+               minExperience = 2; // 2-4 tahun
+               maxExperience = 4;
+               break;
+            case 2:
+               minExperience = 5; // 5 tahun ke atas
+               break;
+            default:
+               minExperience = 0;
+               maxExperience = Integer.MAX_VALUE; // Semua kategori
+               break;
+         }
+
+         return talentRepositoryElastic.findLevelStatusExp(
+               keyword,
+               minExperience,
+               maxExperience,
+               filter.getTalentLevel(),
+               filter.getTalentStatus(),
+               pageable);
+   }
+
+
+   public Page<Talent2> findNameLevelExp(TalentFilterDTO filter, Pageable pageable){
+      String keyword = filter.getKeyword() != null ? filter.getKeyword().toLowerCase() : "";
+         int minExperience = 0;
+         int maxExperience = Integer.MAX_VALUE;
+
+         switch (filter.getTalentExperience()) {
+            case 0:
+               maxExperience = 1; // 0-1 tahun
+               break;
+            case 1:
+               minExperience = 2; // 2-4 tahun
+               maxExperience = 4;
+               break;
+            case 2:
+               minExperience = 5; // 5 tahun ke atas
+               break;
+            default:
+               minExperience = 0;
+               maxExperience = Integer.MAX_VALUE; // Semua kategori
+               break;
+         }
+
+         return talentRepositoryElastic.findLevelExp(
+               keyword,
+               minExperience,
+               maxExperience,
+               filter.getTalentLevel(),
+               pageable);
+   }
+
+   public Page<Talent2> findNameStatusExp(TalentFilterDTO filter, Pageable pageable){
+      String keyword = filter.getKeyword() != null ? filter.getKeyword().toLowerCase() : "";
+         int minExperience = 0;
+         int maxExperience = Integer.MAX_VALUE;
+
+         switch (filter.getTalentExperience()) {
+            case 0:
+               maxExperience = 1; // 0-1 tahun
+               break;
+            case 1:
+               minExperience = 2; // 2-4 tahun
+               maxExperience = 4;
+               break;
+            case 2:
+               minExperience = 5; // 5 tahun ke atas
+               break;
+            default:
+               minExperience = 0;
+               maxExperience = Integer.MAX_VALUE; // Semua kategori
+               break;
+         }
+
+         return talentRepositoryElastic.findStatusExp(
+               keyword,
+               minExperience,
+               maxExperience,
+               filter.getTalentStatus(),
+               pageable);
+   }
+
    // --> GET :: all talents
    // @Cacheable("talents")
    public ResponseEntity<?> getTalents(TalentFilterDTO request, Pageable pageable) {
@@ -74,8 +262,10 @@ public class TalentService {
       if (request.getTalentLevel() != null && !request.getTalentLevel().isEmpty()) {
          boolean talentLevelExists = talentLevelRepository.existsByTalentLevelNameIgnoreCase(request.getTalentLevel());
          if (!talentLevelExists) {
-            String message = messageSource.getMessage("talent.not.found", null, Locale.getDefault());
-            String formatMessage = MessageFormat.format(message, request.getTalentLevel());
+            String message = messageSource.getMessage("talent.not.found", null,
+                  Locale.getDefault());
+            String formatMessage = MessageFormat.format(message,
+                  request.getTalentLevel());
             return ResponseEntity
                   .status(HttpStatus.NOT_FOUND)
                   .body(new NotFoundResponse(formatMessage, HttpStatus.NOT_FOUND.value(),
@@ -84,12 +274,15 @@ public class TalentService {
       }
 
       // --> cek Employee status
-      if (request.getEmployeeStatus() != null && !request.getEmployeeStatus().isEmpty()) {
+      if (request.getEmployeeStatus() != null &&
+            !request.getEmployeeStatus().isEmpty()) {
          boolean employeeStatus = employeeStatusRepository
                .existsByEmployeeStatusNameIgnoreCase(request.getEmployeeStatus());
          if (!employeeStatus) {
-            String message = messageSource.getMessage("talent.not.found", null, Locale.getDefault());
-            String formatMessage = MessageFormat.format(message, request.getEmployeeStatus());
+            String message = messageSource.getMessage("talent.not.found", null,
+                  Locale.getDefault());
+            String formatMessage = MessageFormat.format(message,
+                  request.getEmployeeStatus());
             return ResponseEntity
                   .status(HttpStatus.NOT_FOUND)
                   .body(new NotFoundResponse(formatMessage, HttpStatus.NOT_FOUND.value(),
@@ -98,11 +291,14 @@ public class TalentService {
       }
 
       // --> cek Talent status
-      if (request.getTalentStatus() != null && !request.getTalentStatus().isEmpty()) {
+      if (request.getTalentStatus() != null &&
+            !request.getTalentStatus().isEmpty()) {
          boolean talentStatus = statusRepository.existsByTalentStatusNameIgnoreCase(request.getTalentStatus());
          if (!talentStatus) {
-            String message = messageSource.getMessage("talent.not.found", null, Locale.getDefault());
-            String formatMessage = MessageFormat.format(message, request.getTalentStatus());
+            String message = messageSource.getMessage("talent.not.found", null,
+                  Locale.getDefault());
+            String formatMessage = MessageFormat.format(message,
+                  request.getTalentStatus());
             return ResponseEntity
                   .status(HttpStatus.NOT_FOUND)
                   .body(new NotFoundResponse(formatMessage, HttpStatus.NOT_FOUND.value(),
@@ -113,6 +309,8 @@ public class TalentService {
       Specification<Talent> spec = TalentSpecification.filter(request);
 
       Page<Talent> talents = talentRepository.findAll(spec, pageable);
+
+      log.info(talents.get().toString());
 
       List<UUID> talentIds = talents.stream().map(Talent::getTalentId).collect(Collectors.toList());
 
@@ -148,30 +346,32 @@ public class TalentService {
                response.setTalentExperience(t.getTalentExperience());
                response.setTalentLevel(t.getTalentLevel() != null ? t.getTalentLevel().getTalentLevelName() : null);
 
-               // // --> most efective
-               // // --> mendapatkan PositionResponseDTO
-               // List<PositionResponseDTO> positions = t.getTalentPositions().stream()
-               // .map(tp -> new PositionResponseDTO(tp.getPosition().getPositionId(),
-               // tp.getPosition().getPositionName()))
-               // .collect(Collectors.toList());
+               // --> most efective
+               // --> mendapatkan PositionResponseDTO
+               List<PositionResponseDTO> positions = t.getTalentPositions().stream()
+                     .map(tp -> new PositionResponseDTO(tp.getPosition().getPositionId(),
+                           tp.getPosition().getPositionName()))
+                     .collect(Collectors.toList());
 
-               // // List<PositionResponseDTO> positions =
-               // // talentRepository.findPositionsByTalentId(t.getTalentId());
-               // response.setPositions(positions);
+               // List<PositionResponseDTO> positions =
+               // talentRepository.findPositionsByTalentId(t.getTalentId());
+               response.setPositions(positions);
 
-               // // --> mendapatkan SkillsetResponseDTO
-               // List<SkillsetResponseDTO> skillsets = t.getTalentSkillsets().stream()
-               // .map(ts -> new SkillsetResponseDTO(ts.getSkillset().getSkillsetId(),
-               // ts.getSkillset().getSkillsetName()))
-               // .collect(Collectors.toList());
+               // --> mendapatkan SkillsetResponseDTO
+               List<SkillsetResponseDTO> skillsets = t.getTalentSkillsets().stream()
+                     .map(ts -> new SkillsetResponseDTO(ts.getSkillset().getSkillsetId(),
+                           ts.getSkillset().getSkillsetName()))
+                     .collect(Collectors.toList());
 
-               // // List<SkillsetResponseDTO> skillsets =
-               // // talentRepository.findSkillsetsByTalentId(t.getTalentId());
-               // response.setSkillsets(skillsets);
+               // List<SkillsetResponseDTO> skillsets =
+               // talentRepository.findSkillsetsByTalentId(t.getTalentId());
+               response.setSkillsets(skillsets);
 
                // Set positions and skillsets
-               response.setPositions(positionsMap.getOrDefault(t.getTalentId(), Collections.emptyList()));
-               response.setSkillsets(skillsetsMap.getOrDefault(t.getTalentId(), Collections.emptyList()));
+               response.setPositions(positionsMap.getOrDefault(t.getTalentId(),
+                     Collections.emptyList()));
+               response.setSkillsets(skillsetsMap.getOrDefault(t.getTalentId(),
+                     Collections.emptyList()));
 
                return response;
             }).collect(Collectors.toList());
@@ -190,7 +390,6 @@ public class TalentService {
 
       Talent talent = talentRepository.findById(talentId)
             .orElseThrow(() -> new EntityNotFoundException(talentId + " not found"));
-
 
       List<Object[]> allPositions = talentRepository.findPositionsByTalentId(talentId);
       List<Object[]> allSkillsets = talentRepository.findSkillsetsByTalentId(talentId);
@@ -231,9 +430,9 @@ public class TalentService {
 
       // --> N+1 problem
       // List<SkillsetResponseDTO> skillsets = talent.getTalentSkillsets().stream()
-      //       .map(ts -> new SkillsetResponseDTO(ts.getSkillset().getSkillsetId(),
-      //             ts.getSkillset().getSkillsetName()))
-      //       .collect(Collectors.toList());
+      // .map(ts -> new SkillsetResponseDTO(ts.getSkillset().getSkillsetId(),
+      // ts.getSkillset().getSkillsetName()))
+      // .collect(Collectors.toList());
       // td.setSkillSet(skillsets.isEmpty() ? null : skillsets);
 
       td.setEmail(talent.getEmail());

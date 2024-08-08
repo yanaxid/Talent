@@ -7,6 +7,9 @@ import java.time.format.DateTimeFormatter;
 import java.time.temporal.ChronoUnit;
 
 import org.apache.commons.codec.digest.DigestUtils;
+import org.apache.http.HttpHost;
+import org.elasticsearch.client.RestClient;
+import org.elasticsearch.client.RestClientBuilder;
 import org.modelmapper.ModelMapper;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.ApplicationRunner;
@@ -35,6 +38,8 @@ import com.tujuhsembilan.app.repository.SampleRepository;
 import lib.i18n.utility.MessageUtil;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+
+
 
 @Slf4j
 @Configuration
@@ -128,5 +133,9 @@ public class ApplicationConfig {
             .maximumSize(1000));
       return cacheManager;
    }
+
+
+
+  
 
 }

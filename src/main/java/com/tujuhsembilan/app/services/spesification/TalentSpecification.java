@@ -62,14 +62,14 @@ public class TalentSpecification {
                   filter.getEmployeeStatus().toLowerCase()));
          }
 
-         // --> serch
-         if (filter.getKeyword() != null) {
+         // // --> serch
+         // if (filter.getKeyword() != null) {
 
-            String keyword = "%" + filter.getKeyword().toLowerCase() + "%";
+         //    String keyword = "%" + filter.getKeyword().toLowerCase() + "%";
 
-            predicates.add(criteriaBuilder.like(
-                  criteriaBuilder.lower(root.get("talentName")), keyword));
-         }
+         //    predicates.add(criteriaBuilder.like(
+         //          criteriaBuilder.lower(root.get("talentName")), keyword));
+         // }
 
          // // --> search
          // if (filter.getKeyword() != null && !filter.getKeyword().isEmpty()) {
