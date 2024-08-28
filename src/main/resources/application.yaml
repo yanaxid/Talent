@@ -89,7 +89,7 @@ spring:
             dialect: org.hibernate.dialect.PostgreSQLDialect
             # default-batch-fetch-size: 10
             # enable-lazy-load-no-trans: true
-            # format-sql: true
+            format-sql: true
             # use-sql-comments: true
       # open-in-view: false    
 
@@ -98,27 +98,37 @@ spring:
             # spring.jpa.properties.hibernate.default_batch_fetch_size=10
            
   
-# logging:
-#   level:
-#     org:
-#       hibernate:
-#         SQL: ERROR
-#         type:
-#           descriptor:
-#             sql:
-#               BasicBinder: TRACE
+logging:
+  level:
+    org:
+      hibernate:
+        SQL: ERROR
+        type:
+          descriptor:
+            sql:
+              BasicBinder: TRACE
 
 
 #-----------------------------------
 --- # Minio
 #-----------------------------------
 
+# application:
+#    minio:
+#       url: https://minio.cloudias79.com/
+#       username: devtalentcenter
+#       password: as4Dx6L4Uf1zFkyy
+#       bucket-name: talent-center-app
+
 application:
    minio:
-      url: https://minio.cloudias79.com/
-      username: devtalentcenter
-      password: as4Dx6L4Uf1zFkyy
+      url: http://127.0.0.1:9000
+      username: minioadmin
+      password: minioadmin
       bucket-name: talent-center-app
+ 
+
+
 
 #-----------------------------------
 --- # Elastic Search
@@ -135,4 +145,12 @@ spring:
       allow-bean-definition-overriding: true
 
 
-      
+
+logging:
+      level:
+         org:
+            springframework:
+               data:
+                  elasticsearch:
+                     core:
+                        convert: DEBUG

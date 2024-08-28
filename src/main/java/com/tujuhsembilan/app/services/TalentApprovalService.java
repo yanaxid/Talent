@@ -1,10 +1,12 @@
 package com.tujuhsembilan.app.services;
 
+import java.util.Collections;
 import java.util.List;
 import java.util.stream.Collectors;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageImpl;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.jpa.domain.Specification;
 import org.springframework.http.HttpStatus;
@@ -36,8 +38,35 @@ public class TalentApprovalService {
    private TalentRequestStatusRepository talentRequestStatusRepository;
 
    // --> get :: daftar persetujuan talent
-   public ResponseEntity<?> getListApprovals(TalentApprovalFilterDTO filter, Pageable pageable) {
+   // public Page<ApprovalDTO> getListApprovals(TalentApprovalFilterDTO filter,
+   // Pageable pageable) {
 
+   // try {
+   // Specification<TalentRequest> spec =
+   // TalentApprovalSpesicication.filter(filter);
+   // Page<TalentRequest> talentRequests = talentRequestRepository.findAll(spec,
+   // pageable);
+
+   // List<ApprovalDTO> approvalDTOs = talentRequests.stream().map(
+   // t -> {
+   // ApprovalDTO approvalDTO = new ApprovalDTO();
+   // approvalDTO.setTalentRequestId(t.getTalentRequestId());
+   // approvalDTO.setAgencyName(t.getTalentWishlist().getClient().getAgencyName());
+   // approvalDTO.setTalentName(t.getTalentWishlist().getTalent().getTalentName());
+   // approvalDTO.setApprovalStatus(t.getTalentRequestStatus().getTalentRequestStatusName());
+   // approvalDTO.setRequestDate(t.getRequestDate());
+   // return approvalDTO;
+   // }).collect(Collectors.toList());
+
+   // return (Page<ApprovalDTO>) approvalDTOs;
+   // } catch (Exception e) {
+   // return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(e);
+
+   // }
+
+   // }
+
+   public ResponseEntity<Page<ApprovalDTO>> getListApprovals(TalentApprovalFilterDTO filter, Pageable pageable) {
       try {
          Specification<TalentRequest> spec = TalentApprovalSpesicication.filter(filter);
          Page<TalentRequest> talentRequests = talentRequestRepository.findAll(spec, pageable);
@@ -53,11 +82,12 @@ public class TalentApprovalService {
                   return approvalDTO;
                }).collect(Collectors.toList());
 
-         return ResponseEntity.ok(approvalDTOs);
+         Page<ApprovalDTO> approvalDTOPage = new PageImpl<>(approvalDTOs, pageable, talentRequests.getTotalElements());
+         return ResponseEntity.ok(approvalDTOPage);
       } catch (Exception e) {
-         return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(e);
+         // Mengembalikan INTERNAL_SERVER_ERROR jika terjadi error
+         return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).build();
       }
-
    }
 
    // --> get :: edit persetujuan talent
@@ -66,7 +96,7 @@ public class TalentApprovalService {
 
       try {
 
-         //--> fetch 
+         // --> fetch
          TalentRequest talentRequest = talentRequestRepository
                .findById(request.getTalentRequestId())
                .orElseThrow(() -> new EntityNotFoundException("Id " + request.getTalentRequestId() + " not found"));
@@ -75,15 +105,16 @@ public class TalentApprovalService {
                .findTalentRequestStatusByName(request.getAction())
                .orElseThrow(() -> new EntityNotFoundException(request.getAction() + " is not exist"));
 
-         //--> set data
+         // --> set data
          talentRequest.setTalentRequestStatus(talentRequestStatus);
          talentRequest.setRequestRejectReason(request.getRejectReason());
          talentRequest.getCreation().setLastModifiedBy("yana");
 
-        //--> save
+         // --> save
          talentRequestRepository.save(talentRequest);
 
-         return ResponseEntity.ok(talentRequest.getTalentWishlist().getTalent().getTalentName() + " " + request.getAction());
+         return ResponseEntity
+               .ok(talentRequest.getTalentWishlist().getTalent().getTalentName() + " " + request.getAction());
       } catch (Exception e) {
          return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(e);
       }

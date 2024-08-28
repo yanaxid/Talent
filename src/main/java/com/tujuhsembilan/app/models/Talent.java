@@ -8,7 +8,6 @@ import org.hibernate.annotations.BatchSize;
 import org.springframework.data.elasticsearch.annotations.Document;
 import org.springframework.data.jpa.domain.support.AuditingEntityListener;
 
-
 import jakarta.persistence.CascadeType;
 import jakarta.persistence.Column;
 import jakarta.persistence.Embedded;
@@ -69,13 +68,11 @@ public class Talent {
    @Column(length = 1)
    private Character gender;
 
-
    @Column(name = "talent_cv_url")
    private String talentCvUrl;
- 
+
    @Column(name = "talent_photo_url")
    private String talentPhotoUrl;
-
 
    @Column(name = "birth_date")
    private Date birthDate;
@@ -85,7 +82,6 @@ public class Talent {
 
    @Column(name = "talent_cv_filename")
    private String talentCvFilename;
-
 
    @Column(name = "experience")
    private Integer talentExperience;
@@ -115,8 +111,11 @@ public class Talent {
    private Creation creation;
 
    // --> relation
-   @OneToOne(mappedBy = "talent", fetch = FetchType.LAZY)
+   @OneToOne(mappedBy = "talent", fetch = FetchType.LAZY, cascade = CascadeType.ALL)
    private TalentMetadata talentMetadata;
+
+   // @OneToOne(cascade = CascadeType.ALL, orphanRemoval = true)
+   // private TalentMetadata talentMetadata;
 
    @OneToMany(mappedBy = "talent", fetch = FetchType.LAZY)
    @BatchSize(size = 10)

@@ -1,6 +1,5 @@
 package com.tujuhsembilan.app.models;
 
-
 import org.springframework.data.jpa.domain.support.AuditingEntityListener;
 
 import jakarta.persistence.EmbeddedId;
@@ -11,6 +10,7 @@ import jakarta.persistence.JoinColumn;
 import jakarta.persistence.ManyToOne;
 import jakarta.persistence.MapsId;
 import jakarta.persistence.Table;
+import jakarta.persistence.Version;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Data;
@@ -25,6 +25,7 @@ import lombok.NoArgsConstructor;
 
 @Table(name = "talent_position")
 public class TalentPosition {
+
 
    @EmbeddedId
    private TalentPositionId id;

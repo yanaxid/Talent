@@ -90,7 +90,6 @@ public class TalentService {
          tl = "";
       }
 
-       
       //--> level
       if (filter.getTalentLevel() != null && filter.getTalentExperience() == null && filter.getTalentStatus() ==  null) {
          return talentRepositoryElastic.findLevel(tl.toLowerCase(), filter.getTalentLevel(), pageable);
@@ -258,7 +257,7 @@ public class TalentService {
 
       log.info("Pageable received in service: {}", pageable);
 
-      // --> cek talent level
+     // --> cek talent level
       if (request.getTalentLevel() != null && !request.getTalentLevel().isEmpty()) {
          boolean talentLevelExists = talentLevelRepository.existsByTalentLevelNameIgnoreCase(request.getTalentLevel());
          if (!talentLevelExists) {
@@ -442,6 +441,9 @@ public class TalentService {
                   : null);
       td.setTalentAvailability(talent.getTalentAvailability());
       td.setVideoUrl(talent.getBiographyVideoUrl());
+      td.setTalentPhotoUrl(talent.getTalentPhotoUrl());
+      td.setTalentCvUrl(talent.getTalentCvUrl());
+     
 
       return ResponseEntity.ok(td);
    }

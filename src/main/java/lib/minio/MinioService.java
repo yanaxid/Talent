@@ -9,7 +9,6 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.web.multipart.MultipartFile;
 
-
 import io.minio.GetPresignedObjectUrlArgs;
 import io.minio.MinioClient;
 import io.minio.PutObjectArgs;
@@ -32,7 +31,8 @@ import lombok.extern.slf4j.Slf4j;
 @RequiredArgsConstructor(onConstructor = @__(@Autowired))
 public class MinioService {
 
-   private static final Long DEFAULT_EXPIRY = TimeUnit.HOURS.toSeconds(1);
+   // private static final Long DEFAULT_EXPIRY = TimeUnit.HOURS.toSeconds(1);
+   private static final Long DEFAULT_EXPIRY = TimeUnit.DAYS.toSeconds(7);
 
    private final MinioClient minio;
    private final MinioProp prop;
@@ -86,23 +86,23 @@ public class MinioService {
 
    // // --> check if file exist
    // public boolean fileExists(String filename) {
-   //    try {
-   //       minio.getObject(
-   //             GetObjectArgs.builder()
-   //                   .bucket(prop.getBucketName())
-   //                   .object(filename)
-   //                   .build());
-   //       return true;
-   //    } catch (MinioException e) {
-   //       log.error(filename, e);
-   //       return false;
-   //    } catch (Exception e) {
-   //       if (filename == null) {
-   //          return false;
-   //       }
-   //       log.error(filename, e);
-   //       throw new RuntimeException("Error checking if file exists in MinIO", e);
-   //    }
+   // try {
+   // minio.getObject(
+   // GetObjectArgs.builder()
+   // .bucket(prop.getBucketName())
+   // .object(filename)
+   // .build());
+   // return true;
+   // } catch (MinioException e) {
+   // log.error(filename, e);
+   // return false;
+   // } catch (Exception e) {
+   // if (filename == null) {
+   // return false;
+   // }
+   // log.error(filename, e);
+   // throw new RuntimeException("Error checking if file exists in MinIO", e);
+   // }
    // }
 
    // --> delete file
@@ -144,6 +144,8 @@ public class MinioService {
                      .stream(file.getInputStream(), file.getSize(), -1)
                      .contentType(file.getContentType())
                      .build());
+
+         
       } catch (Exception e) {
          log.error(filename, e);
          throw new IOException("Error uploading file to MinIO", e);
@@ -155,75 +157,77 @@ public class MinioService {
       uploadFile(newFilename, file);
    }
 
-   // public String uploadFileToMinio(TalentRequestDTO request, MultipartFile talentFile) throws IOException {
-   //    String talentName = sanitizeForFilename(request.getTalentName());
+   // public String uploadFileToMinio(TalentRequestDTO request, MultipartFile
+   // talentFile) throws IOException {
+   // String talentName = sanitizeForFilename(request.getTalentName());
 
-   //    if (talentName.isEmpty()) {
-   //       log.warn("One or more components for filename are empty. Talent: {},",
-   //             request.getTalentName());
-   //    }
-
-   //    String timestamp = String.valueOf(System.currentTimeMillis());
-   //    String fileExtension = getFileExtension(talentFile.getOriginalFilename());
-
-   //    String generatedFilename = String.format(
-   //          "%s_%s%s",
-   //          talentName,
-   //          timestamp,
-   //          fileExtension);
-
-   //    try (InputStream inputStream = talentFile.getInputStream()) {
-   //       minio.putObject(
-   //             PutObjectArgs.builder()
-   //                   .bucket(prop.getBucketName())
-   //                   .object(generatedFilename)
-   //                   .stream(inputStream, talentFile.getSize(), -1)
-   //                   .contentType(talentFile.getContentType())
-   //                   .build());
-   //    } catch (Exception e) {
-   //       throw new IOException("Failed to upload file to MinIO", e);
-   //    }
-
-   //    log.info(generatedFilename);
-   //    return generatedFilename;
+   // if (talentName.isEmpty()) {
+   // log.warn("One or more components for filename are empty. Talent: {},",
+   // request.getTalentName());
    // }
 
-   // public String updateFileToMinio(TalentRequestDTO request, MultipartFile talentFile) throws IOException {
+   // String timestamp = String.valueOf(System.currentTimeMillis());
+   // String fileExtension = getFileExtension(talentFile.getOriginalFilename());
 
-   //    if (talentFile == null || talentFile.isEmpty()) {
-   //       log.warn("File is null or empty.");
-   //       return null;
-   //    }
+   // String generatedFilename = String.format(
+   // "%s_%s%s",
+   // talentName,
+   // timestamp,
+   // fileExtension);
 
-   //    String talentName = sanitizeForFilename(request.getTalentName());
+   // try (InputStream inputStream = talentFile.getInputStream()) {
+   // minio.putObject(
+   // PutObjectArgs.builder()
+   // .bucket(prop.getBucketName())
+   // .object(generatedFilename)
+   // .stream(inputStream, talentFile.getSize(), -1)
+   // .contentType(talentFile.getContentType())
+   // .build());
+   // } catch (Exception e) {
+   // throw new IOException("Failed to upload file to MinIO", e);
+   // }
 
-   //    if (talentName.isEmpty()) {
-   //       log.warn("One or more components for filename are empty. Talent: {}",
-   //             request.getTalentName());
-   //    }
+   // log.info(generatedFilename);
+   // return generatedFilename;
+   // }
 
-   //    String timestamp = String.valueOf(System.currentTimeMillis());
-   //    String fileExtension = getFileExtension(talentFile.getOriginalFilename());
+   // public String updateFileToMinio(TalentRequestDTO request, MultipartFile
+   // talentFile) throws IOException {
 
-   //    String generatedFilename = String.format(
-   //          "%s_%s%s",
-   //          talentName,
-   //          timestamp,
-   //          fileExtension);
+   // if (talentFile == null || talentFile.isEmpty()) {
+   // log.warn("File is null or empty.");
+   // return null;
+   // }
 
-   //    try (InputStream inputStream = talentFile.getInputStream()) {
-   //       minio.putObject(
-   //             PutObjectArgs.builder()
-   //                   .bucket(prop.getBucketName())
-   //                   .object(generatedFilename)
-   //                   .stream(inputStream, talentFile.getSize(), -1)
-   //                   .contentType(talentFile.getContentType())
-   //                   .build());
-   //    } catch (Exception e) {
-   //       throw new IOException("Failed to upload file to MinIO", e);
-   //    }
+   // String talentName = sanitizeForFilename(request.getTalentName());
 
-   //    log.info(generatedFilename);
-   //    return generatedFilename;
+   // if (talentName.isEmpty()) {
+   // log.warn("One or more components for filename are empty. Talent: {}",
+   // request.getTalentName());
+   // }
+
+   // String timestamp = String.valueOf(System.currentTimeMillis());
+   // String fileExtension = getFileExtension(talentFile.getOriginalFilename());
+
+   // String generatedFilename = String.format(
+   // "%s_%s%s",
+   // talentName,
+   // timestamp,
+   // fileExtension);
+
+   // try (InputStream inputStream = talentFile.getInputStream()) {
+   // minio.putObject(
+   // PutObjectArgs.builder()
+   // .bucket(prop.getBucketName())
+   // .object(generatedFilename)
+   // .stream(inputStream, talentFile.getSize(), -1)
+   // .contentType(talentFile.getContentType())
+   // .build());
+   // } catch (Exception e) {
+   // throw new IOException("Failed to upload file to MinIO", e);
+   // }
+
+   // log.info(generatedFilename);
+   // return generatedFilename;
    // }
 }

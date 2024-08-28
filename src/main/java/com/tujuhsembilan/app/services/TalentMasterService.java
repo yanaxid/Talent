@@ -3,12 +3,14 @@ package com.tujuhsembilan.app.services;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
+import java.util.Set;
 import java.util.UUID;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Service;
+
 import org.springframework.web.multipart.MultipartFile;
 
 import com.tujuhsembilan.app.dtos.request.TalentRequestDTO;
@@ -37,7 +39,11 @@ import com.tujuhsembilan.app.repository.TalentRepository;
 import com.tujuhsembilan.app.repository.TalentSkillsetRepository;
 import com.tujuhsembilan.app.repository.TalentStatusRepository;
 
+import jakarta.persistence.EntityManager;
 import jakarta.transaction.Transactional;
+import jakarta.validation.ConstraintViolation;
+import jakarta.validation.Valid;
+import jakarta.validation.Validator;
 import lib.minio.MinioService;
 import lombok.extern.slf4j.Slf4j;
 
@@ -72,6 +78,12 @@ public class TalentMasterService {
 
    @Autowired
    private MinioService minioService;
+
+   @Autowired
+   private EntityManager entityManager;
+
+   @Autowired
+   private Validator validator;
 
    // --> get :: Search Data Master Level Talent
    public ResponseEntity<?> getMasterTalentLevel() {
@@ -126,6 +138,16 @@ public class TalentMasterService {
    @Transactional
    public ResponseEntity<?> createTalent(TalentRequestDTO request, MultipartFile fotoFile, MultipartFile cvFile) {
 
+      // --> validasi input
+      Set<ConstraintViolation<TalentRequestDTO>> violations = validator.validate(request);
+      if (!violations.isEmpty()) {
+         StringBuilder sb = new StringBuilder();
+         for (ConstraintViolation<TalentRequestDTO> violation : violations) {
+            sb.append(violation.getMessage()).append(" ");
+         }
+         return ResponseEntity.badRequest().body(sb.toString());
+      }
+
       try {
          // --> create new talent
          Talent talent = new Talent();
@@ -135,6 +157,7 @@ public class TalentMasterService {
          // --> validate name
          if (request.getTalentName() == null || request.getTalentName().isEmpty()) {
             return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body("Nama tidak boleh kosong");
+
          }
 
          // --> fetch and validate talentStatus
@@ -290,12 +313,21 @@ public class TalentMasterService {
    public ResponseEntity<?> updateTalent(UUID talentId, TalentRequestDTO request, MultipartFile fotoFile,
          MultipartFile cvFile) {
 
+      // --> validasi input
+      Set<ConstraintViolation<TalentRequestDTO>> violations = validator.validate(request);
+      if (!violations.isEmpty()) {
+         StringBuilder sb = new StringBuilder();
+         for (ConstraintViolation<TalentRequestDTO> violation : violations) {
+            sb.append(violation.getMessage()).append(" ");
+         }
+         return ResponseEntity.badRequest().body(sb.toString());
+      }
+
       try {
          // --> get talent by id
          Optional<Talent> talent = talentRepository.findById(talentId);
 
          log.info("START >>>>");
-
 
          if (talent.isEmpty()) {
             return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body("taletn id not found");
@@ -409,58 +441,93 @@ public class TalentMasterService {
          // Save Talent first
          talentRepository.save(talent.get());
 
-         // --> save talent positions
          if (request.getPositions() != null) {
-            List<TalentPosition> talentPositions = new ArrayList<>();
 
+            // --> remove curent list positions
+            List<TalentPosition> talentPositions = talentPositionRepository
+                  .findTalentPositionByTalentId(talent.get().getTalentId());
+
+            if (talentPositions.size() > 0) {
+               log.info("yaaaaaaa");
+               talentPositionRepository.deleteByTalentId(talent.get().getTalentId());
+               entityManager.flush(); // Flush changes to database
+               entityManager.clear();
+            }
+
+            List<TalentPosition> tp = new ArrayList<>();
+
+            // --> create new list positions
             for (PositionResponseDTO positionDTO : request.getPositions()) {
+
                Position position = positionRepository.findById(positionDTO.getPositionId())
                      .orElseThrow(() -> new IllegalArgumentException("Invalid Position ID"));
 
+               TalentPositionId talentPositionId = new TalentPositionId(talent.get().getTalentId(),
+                     position.getPositionId());
+
                TalentPosition talentPosition = TalentPosition.builder()
-                     .id(new TalentPositionId(talent.get().getTalentId(), position.getPositionId()))
+                     .id(talentPositionId)
                      .talent(talent.get())
                      .position(position)
                      .creation(creation)
                      .build();
 
-               talentPositions.add(talentPosition);
+               log.info("--->  " + talentPosition.getPosition().getPositionName());
+
+               talentPosition.setTalent(talent.get());
+               talentPosition.setPosition(position);
+               talentPosition.setCreation(creation);
+               tp.add(talentPosition);
             }
 
-            talentPositionRepository.saveAll(talentPositions);
-            talent.get().setTalentPositions(talentPositions);
+            talentPositionRepository.saveAll(tp);
+            talent.get().setTalentPositions(tp);
          }
 
-         // --> save talent skillsets
          if (request.getSkillsets() != null) {
 
-            List<TalentSkillset> talentSkillsets = new ArrayList<>();
+            // --> remove curent list positions
+            List<TalentSkillset> talentSkillsets = talentSkillsetRepository
+                  .findTalentSkillsetByTalentId(talent.get().getTalentId());
 
-            for (SkillsetResponseDTO skilsetsDTO : request.getSkillsets()) {
+            if (talentSkillsets.size() > 0) {
+               // talentSkillsetRepository.deleteByTalentId(talent.get().getTalentId());
+               talentSkillsetRepository.deleteAll(talentSkillsets);
+               entityManager.flush(); // Flush changes to database
+               entityManager.clear();
+            }
 
-               Skillset skillset = skillsetRepository.findById(skilsetsDTO.getSkillsetId())
-                     .orElseThrow(() -> new IllegalArgumentException("Invalid Skilset ID"));
+            List<TalentSkillset> ts = new ArrayList<>();
+
+            // --> create new list positions
+            for (SkillsetResponseDTO skillseDTO : request.getSkillsets()) {
+
+               Skillset skillset = skillsetRepository.findById(skillseDTO.getSkillsetId())
+                     .orElseThrow(() -> new IllegalArgumentException("Invalid Skillset ID"));
+
+               TalentSkillsetId talentSkillsetId = new TalentSkillsetId(talent.get().getTalentId(),
+                     skillset.getSkillsetId());
 
                TalentSkillset talentSkillset = TalentSkillset.builder()
-                     .id(new TalentSkillsetId(talent.get().getTalentId(), skillset.getSkillsetId()))
+                     .id(talentSkillsetId)
                      .talent(talent.get())
                      .skillset(skillset)
                      .creation(creation)
                      .build();
 
-               talentSkillsets.add(talentSkillset);
+               log.info("---> " + talentSkillset.getSkillset().getSkillsetName());
+
+               talentSkillset.setTalent(talent.get());
+               talentSkillset.setSkillset(skillset);
+               talentSkillset.setCreation(creation);
+               ts.add(talentSkillset);
             }
 
-            talentSkillsetRepository.saveAll(talentSkillsets);
-            talent.get().setTalentSkillsets(talentSkillsets);
+            talentSkillsetRepository.saveAll(ts);
+            talent.get().setTalentSkillsets(ts);
          }
 
-
-
-       
-
          return ResponseEntity.ok("Talent with name " + talent.get().getTalentName() + " updated successfully");
-        
 
       } catch (
 

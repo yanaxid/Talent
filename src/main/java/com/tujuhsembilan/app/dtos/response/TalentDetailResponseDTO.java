@@ -35,5 +35,7 @@ public class TalentDetailResponseDTO {
    private String employeeStatus;
    private Boolean talentAvailability;
    private String videoUrl;
+   private String talentPhotoUrl;
+   private String talentCvUrl;
 
 }

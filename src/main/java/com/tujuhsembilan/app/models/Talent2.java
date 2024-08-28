@@ -5,10 +5,13 @@ import lombok.NoArgsConstructor;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import org.springframework.data.annotation.Id;
+import org.springframework.data.elasticsearch.annotations.DateFormat;
 import org.springframework.data.elasticsearch.annotations.Document;
 import org.springframework.data.elasticsearch.annotations.Field;
 import org.springframework.data.elasticsearch.annotations.FieldType;
 
+import java.time.Instant;
+import java.time.LocalDateTime;
 import java.util.Date;
 import java.util.List;
 import java.util.UUID;
@@ -61,6 +64,9 @@ public class Talent2 {
    @Field(type = FieldType.Text, name = "talent_photo_filename")
    private String talentPhotoFilename;
 
+   @Field(type = FieldType.Text, name = "talent_photo_url")
+   private String talentPhotoUrl;
+
    @Field(type = FieldType.Text, name = "email")
    private String email;
 
@@ -70,8 +76,8 @@ public class Talent2 {
    @Field(type = FieldType.Boolean, name = "is_active")
    private Boolean isActive;
 
-   @Field(type = FieldType.Date, name = "birth_date")
-   private Date birthDate;
+   @Field( name = "birth_date")
+   private Instant birthDate;
 
    @Field(type = FieldType.Text, name = "talent_description")
    private String talentDescription;
@@ -79,11 +85,15 @@ public class Talent2 {
    @Field(type = FieldType.Text, name = "talent_status_name")
    private String talentStatusName;
 
-   @Field(type = FieldType.Date, name = "last_modified_time")
-   private Date lastModifiedTime;
 
-   @Field(type = FieldType.Date, name = "created_time")
-   private Date createdTime;
+
+
+
+   @Field(name = "last_modified_time")
+   private Instant lastModifiedTime;
+
+   @Field( name = "created_time")
+   private Instant createdTime;
 
    @Field(type = FieldType.Text, name = "cellphone")
    private String cellphone;

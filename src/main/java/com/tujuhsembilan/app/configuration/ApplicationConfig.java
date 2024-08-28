@@ -7,9 +7,6 @@ import java.time.format.DateTimeFormatter;
 import java.time.temporal.ChronoUnit;
 
 import org.apache.commons.codec.digest.DigestUtils;
-import org.apache.http.HttpHost;
-import org.elasticsearch.client.RestClient;
-import org.elasticsearch.client.RestClientBuilder;
 import org.modelmapper.ModelMapper;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.ApplicationRunner;
@@ -22,6 +19,7 @@ import org.springframework.security.config.annotation.web.builders.HttpSecurity;
 import org.springframework.security.config.annotation.web.configuration.EnableWebSecurity;
 import org.springframework.security.config.annotation.web.configurers.AbstractHttpConfigurer;
 import org.springframework.security.web.SecurityFilterChain;
+import org.springframework.validation.beanvalidation.LocalValidatorFactoryBean;
 
 import com.fasterxml.jackson.databind.module.SimpleModule;
 import com.fasterxml.jackson.datatype.jsr310.deser.LocalDateDeserializer;
@@ -35,11 +33,10 @@ import com.toedter.spring.hateoas.jsonapi.JsonApiConfiguration;
 import com.tujuhsembilan.app.models.SampleModel;
 import com.tujuhsembilan.app.repository.SampleRepository;
 
+import jakarta.validation.Validator;
 import lib.i18n.utility.MessageUtil;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
-
-
 
 @Slf4j
 @Configuration
@@ -136,6 +133,13 @@ public class ApplicationConfig {
 
 
 
-  
+   @Bean
+    public Validator validator() {
+        return new LocalValidatorFactoryBean();
+    }
+
+
+
+ 
 
 }
