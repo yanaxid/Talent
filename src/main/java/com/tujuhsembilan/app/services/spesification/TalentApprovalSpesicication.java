@@ -31,18 +31,20 @@ public class TalentApprovalSpesicication {
                   filter.getTalentRequestStatus().toLowerCase()));
          }
 
-         if (filter.getRequestDate() != null) {
-            String requestDate = "%" + filter.getRequestDate().toLowerCase() + "%";
 
-            predicates.add(criteriaBuilder.like(
-                  criteriaBuilder.function("TO_CHAR", String.class,
-                        root.get("requestDate"),
-                        criteriaBuilder.literal("YYYY-MM-DD")),
-                  requestDate
+         //!!! DEPRECATED
+         // if (filter.getRequestDate() != null) {
+         //    String requestDate = "%" + filter.getRequestDate().toLowerCase() + "%";
 
-            ));
+         //    predicates.add(criteriaBuilder.like(
+         //          criteriaBuilder.function("TO_CHAR", String.class,
+         //                root.get("requestDate"),
+         //                criteriaBuilder.literal("YYYY-MM-DD")),
+         //          requestDate
 
-         }
+         //    ));
+
+         // }
 
          
 

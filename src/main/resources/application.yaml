@@ -146,11 +146,11 @@ spring:
 
 
 
-logging:
-      level:
-         org:
-            springframework:
-               data:
-                  elasticsearch:
-                     core:
-                        convert: DEBUG
+# logging:
+#       level:
+#          org:
+#             springframework:
+#                data:
+#                   elasticsearch:
+#                      core:
+#                         convert: DEBUG

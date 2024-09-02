@@ -1,6 +1,7 @@
 package com.tujuhsembilan.app.services;
 
 import java.text.MessageFormat;
+import java.text.SimpleDateFormat;
 import java.util.Collections;
 import java.util.List;
 import java.util.Locale;
@@ -12,6 +13,8 @@ import java.util.stream.Collectors;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.MessageSource;
 import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageImpl;
+import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.jpa.domain.Specification;
 import org.springframework.http.HttpStatus;
@@ -24,14 +27,14 @@ import com.tujuhsembilan.app.dtos.response.PositionResponseDTO;
 import com.tujuhsembilan.app.dtos.response.SkillsetResponseDTO;
 import com.tujuhsembilan.app.dtos.response.TalentDetailResponseDTO;
 import com.tujuhsembilan.app.dtos.response.TalentResponseDTO;
-import com.tujuhsembilan.app.elastic.TalentRepositoryElastic;
+import com.tujuhsembilan.app.model_elastic.TalentElastic;
 import com.tujuhsembilan.app.models.Talent;
-import com.tujuhsembilan.app.models.Talent2;
 import com.tujuhsembilan.app.repository.EmployeeStatusRepository;
 import com.tujuhsembilan.app.repository.TalentLevelRepository;
 import com.tujuhsembilan.app.repository.TalentRepository;
 import com.tujuhsembilan.app.repository.TalentRequestRepository;
 import com.tujuhsembilan.app.repository.TalentStatusRepository;
+import com.tujuhsembilan.app.repository_elastic.TalentRepositoryElastic;
 import com.tujuhsembilan.app.services.spesification.TalentSpecification;
 
 import jakarta.persistence.EntityNotFoundException;
@@ -67,72 +70,112 @@ public class TalentService {
    @Autowired
    private TalentRequestRepository talentRequestRepository;
 
-   // @Autowired
-   // private CacheManager cacheManager;
-
-
-   //--> FILTER
-   //level
-   //status
-   //exp
-   
-   //evel-status
-   //level-experience
-   //status-experience
-   
-   //level-status-experience
-   
-
-   public Page<Talent2> searchTalents(TalentFilterDTO filter, Pageable pageable) {
-
+   public Page<TalentElastic> searchTalents(TalentFilterDTO filter, Pageable pageable) {
       String tl = filter.getKeyword();
-      if (filter.getKeyword() == null || filter.getKeyword().isEmpty()) {
+      if (tl == null || tl.isEmpty()) {
          tl = "";
       }
 
-      //--> level
-      if (filter.getTalentLevel() != null && filter.getTalentExperience() == null && filter.getTalentStatus() ==  null) {
-         return talentRepositoryElastic.findLevel(tl.toLowerCase(), filter.getTalentLevel(), pageable);
-      } 
-      //--> status
-      else if (filter.getTalentLevel() == null && filter.getTalentExperience() == null && filter.getTalentStatus() !=  null) {
-         return talentRepositoryElastic.findStatus(tl.toLowerCase(), filter.getTalentStatus(), pageable);
-      } 
-      
-      // --> exp
-      else if (filter.getTalentLevel() == null && filter.getTalentExperience() != null && filter.getTalentStatus() ==  null) {
-         return findNameExp(filter, pageable);
+      // Ambil halaman hasil pencarian sesuai filter
+      Page<TalentElastic> resultPage;
+
+      /*
+       * FILTER
+       * 
+       * level
+       * status
+       * exp
+       * emp ++
+       * 
+       * level-status
+       * level-exp
+       * level-emp ++
+       * status-exp
+       * status-emp ++
+       * exp-emp ++
+       * 
+       * 
+       * 
+       * level-status-exp
+       * 
+       * level-status-emp ++
+       * level-emp-exp ++
+       * status-emp-exp ++
+       * 
+       * only kyeowrd
+       */
+
+      // level
+      if (filter.getTalentLevel() != null && filter.getTalentExperience() == null && filter.getTalentStatus() == null) {
+         resultPage = talentRepositoryElastic.findLevel(tl.toLowerCase(), filter.getTalentLevel(), pageable);
       }
 
-      //--> level-status
-      else if (filter.getTalentLevel() != null && filter.getTalentExperience() == null && filter.getTalentStatus() !=  null) {
-         return talentRepositoryElastic.findLevelStatus(tl.toLowerCase(), filter.getTalentLevel(), filter.getTalentStatus(), pageable);
+      // status
+      else if (filter.getTalentLevel() == null && filter.getTalentExperience() == null
+            && filter.getTalentStatus() != null) {
+         resultPage = talentRepositoryElastic.findStatus(tl.toLowerCase(), filter.getTalentStatus(), pageable);
       }
 
-      //--> level-exp
-      else if (filter.getTalentLevel() != null && filter.getTalentExperience() != null && filter.getTalentStatus() ==  null ) {
-        return findNameLevelExp(filter, pageable);
+      // exp
+      else if (filter.getTalentLevel() == null && filter.getTalentExperience() != null
+            && filter.getTalentStatus() == null) {
+         resultPage = findNameExp(filter, pageable);
       }
 
-      //--> status-exp
-      else if (filter.getTalentLevel() == null && filter.getTalentExperience() != null && filter.getTalentStatus() !=  null ) {
-         return findNameStatusExp(filter, pageable);
+      // level-status
+      else if (filter.getTalentLevel() != null && filter.getTalentExperience() == null
+            && filter.getTalentStatus() != null) {
+         resultPage = talentRepositoryElastic.findLevelStatus(tl.toLowerCase(), filter.getTalentLevel(),
+               filter.getTalentStatus(), pageable);
       }
 
-      //--> level-status-experience
-      else if (filter.getTalentLevel() != null && filter.getTalentStatus() != null && filter.getTalentExperience() != null) {
-         return findNameLevelStatusExp(filter, pageable);
-
+      // level-exp
+      else if (filter.getTalentLevel() != null && filter.getTalentExperience() != null
+            && filter.getTalentStatus() == null) {
+         resultPage = findNameLevelExp(filter, pageable);
       }
 
-      // --> name
+      // status-exp
+      else if (filter.getTalentLevel() == null && filter.getTalentExperience() != null
+            && filter.getTalentStatus() != null) {
+         resultPage = findNameStatusExp(filter, pageable);
+      }
+
+      // level-status-exp
+      else if (filter.getTalentLevel() != null && filter.getTalentStatus() != null
+            && filter.getTalentExperience() != null) {
+         resultPage = findNameLevelStatusExp(filter, pageable);
+      }
+
+      // only kyeowrd
       else {
-         return talentRepositoryElastic.searchByKeyword(tl.toLowerCase(), pageable);
+         resultPage = talentRepositoryElastic.searchByKeyword(tl.toLowerCase(), pageable);
       }
 
+      // Batasi hasil ke 10 halaman
+      return limitToMaxPages(resultPage, pageable, 10);
    }
 
-   public Page<Talent2> findNameExp(TalentFilterDTO filter, Pageable pageable){
+   private Page<TalentElastic> limitToMaxPages(Page<TalentElastic> resultPage, Pageable pageable, int maxPages) {
+
+      if (resultPage.getTotalPages() > maxPages) {
+
+         // --> hitung total element
+         // misal size 50 * 10 = 500
+         // misal size 20 * 10 = 200
+         int maxElements = maxPages * pageable.getPageSize();
+
+         List<TalentElastic> limitedContent = resultPage.getContent().stream().limit(maxElements)
+               .collect(Collectors.toList());
+
+         // content ( hal = 1, size = 0, max 500)
+         return new PageImpl<>(limitedContent, PageRequest.of(0, pageable.getPageSize()), maxElements);
+      }
+
+      return resultPage;
+   }
+
+   public Page<TalentElastic> findNameExp(TalentFilterDTO filter, Pageable pageable) {
       // --> create category
       String keyword = filter.getKeyword() != null ? filter.getKeyword().toLowerCase() : "";
       int minExperience = 0;
@@ -159,96 +202,95 @@ public class TalentService {
             pageable);
    }
 
-   public Page<Talent2> findNameLevelStatusExp(TalentFilterDTO filter, Pageable pageable){
+   public Page<TalentElastic> findNameLevelStatusExp(TalentFilterDTO filter, Pageable pageable) {
       String keyword = filter.getKeyword() != null ? filter.getKeyword().toLowerCase() : "";
-         int minExperience = 0;
-         int maxExperience = Integer.MAX_VALUE;
+      int minExperience = 0;
+      int maxExperience = Integer.MAX_VALUE;
 
-         switch (filter.getTalentExperience()) {
-            case 0:
-               maxExperience = 1; // 0-1 tahun
-               break;
-            case 1:
-               minExperience = 2; // 2-4 tahun
-               maxExperience = 4;
-               break;
-            case 2:
-               minExperience = 5; // 5 tahun ke atas
-               break;
-            default:
-               minExperience = 0;
-               maxExperience = Integer.MAX_VALUE; // Semua kategori
-               break;
-         }
+      switch (filter.getTalentExperience()) {
+         case 0:
+            maxExperience = 1; // 0-1 tahun
+            break;
+         case 1:
+            minExperience = 2; // 2-4 tahun
+            maxExperience = 4;
+            break;
+         case 2:
+            minExperience = 5; // 5 tahun ke atas
+            break;
+         default:
+            minExperience = 0;
+            maxExperience = Integer.MAX_VALUE; // Semua kategori
+            break;
+      }
 
-         return talentRepositoryElastic.findLevelStatusExp(
-               keyword,
-               minExperience,
-               maxExperience,
-               filter.getTalentLevel(),
-               filter.getTalentStatus(),
-               pageable);
+      return talentRepositoryElastic.findLevelStatusExp(
+            keyword,
+            minExperience,
+            maxExperience,
+            filter.getTalentLevel(),
+            filter.getTalentStatus(),
+            pageable);
    }
 
-
-   public Page<Talent2> findNameLevelExp(TalentFilterDTO filter, Pageable pageable){
+   public Page<TalentElastic> findNameLevelExp(TalentFilterDTO filter, Pageable pageable) {
       String keyword = filter.getKeyword() != null ? filter.getKeyword().toLowerCase() : "";
-         int minExperience = 0;
-         int maxExperience = Integer.MAX_VALUE;
+      int minExperience = 0;
+      int maxExperience = Integer.MAX_VALUE;
 
-         switch (filter.getTalentExperience()) {
-            case 0:
-               maxExperience = 1; // 0-1 tahun
-               break;
-            case 1:
-               minExperience = 2; // 2-4 tahun
-               maxExperience = 4;
-               break;
-            case 2:
-               minExperience = 5; // 5 tahun ke atas
-               break;
-            default:
-               minExperience = 0;
-               maxExperience = Integer.MAX_VALUE; // Semua kategori
-               break;
-         }
+      switch (filter.getTalentExperience()) {
+         case 0:
+            maxExperience = 1; // 0-1 tahun
+            break;
+         case 1:
+            minExperience = 2; // 2-4 tahun
+            maxExperience = 4;
+            break;
+         case 2:
+            minExperience = 5; // 5 tahun ke atas
+            break;
+         default:
+            minExperience = 0;
+            maxExperience = Integer.MAX_VALUE; // Semua kategori
+            break;
+      }
 
-         return talentRepositoryElastic.findLevelExp(
-               keyword,
-               minExperience,
-               maxExperience,
-               filter.getTalentLevel(),
-               pageable);
+      return talentRepositoryElastic.findLevelExp(
+            keyword,
+            minExperience,
+            maxExperience,
+            filter.getTalentLevel(),
+            pageable);
    }
 
-   public Page<Talent2> findNameStatusExp(TalentFilterDTO filter, Pageable pageable){
+   public Page<TalentElastic> findNameStatusExp(TalentFilterDTO filter, Pageable pageable) {
       String keyword = filter.getKeyword() != null ? filter.getKeyword().toLowerCase() : "";
-         int minExperience = 0;
-         int maxExperience = Integer.MAX_VALUE;
+      int minExperience = 0;
+      int maxExperience = Integer.MAX_VALUE;
 
-         switch (filter.getTalentExperience()) {
-            case 0:
-               maxExperience = 1; // 0-1 tahun
-               break;
-            case 1:
-               minExperience = 2; // 2-4 tahun
-               maxExperience = 4;
-               break;
-            case 2:
-               minExperience = 5; // 5 tahun ke atas
-               break;
-            default:
-               minExperience = 0;
-               maxExperience = Integer.MAX_VALUE; // Semua kategori
-               break;
-         }
+      switch (filter.getTalentExperience()) {
+         case 0:
+            maxExperience = 1; // 0-1 tahun
+            break;
+         case 1:
+            minExperience = 2; // 2-4 tahun
+            maxExperience = 4;
+            break;
+         case 2:
+            minExperience = 5; // 5 tahun ke atas
+            break;
+         default:
+            minExperience = 0;
+            maxExperience = Integer.MAX_VALUE; // Semua kategori
+            break;
+      }
 
-         return talentRepositoryElastic.findStatusExp(
-               keyword,
-               minExperience,
-               maxExperience,
-               filter.getTalentStatus(),
-               pageable);
+      return talentRepositoryElastic.findStatusExp(
+            keyword,
+            minExperience,
+            maxExperience,
+            filter.getTalentStatus(),
+            pageable);
    }
 
    // --> GET :: all talents
@@ -257,7 +299,7 @@ public class TalentService {
 
       log.info("Pageable received in service: {}", pageable);
 
-     // --> cek talent level
+      // --> cek talent level
       if (request.getTalentLevel() != null && !request.getTalentLevel().isEmpty()) {
          boolean talentLevelExists = talentLevelRepository.existsByTalentLevelNameIgnoreCase(request.getTalentLevel());
          if (!talentLevelExists) {
@@ -412,7 +454,7 @@ public class TalentService {
             talent.getTalentStatus() != null ? talent.getTalentStatus().getTalentStatusName() : null);
       td.setNip(talent.getEmployeeNumber());
       td.setSex(talent.getGender());
-      td.setDob(talent.getBirthDate());
+      td.setDob(String.valueOf(talent.getBirthDate()));
       td.setTalentDescription(talent.getTalentDescription());
       td.setCv(talent.getTalentCvFilename());
       td.setTalentExperience(talent.getTalentExperience());
@@ -427,13 +469,6 @@ public class TalentService {
       td.setPosition(positionsMap.getOrDefault(talentId, Collections.emptyList()));
       td.setSkillSet(skillsetsMap.getOrDefault(talentId, Collections.emptyList()));
 
-      // --> N+1 problem
-      // List<SkillsetResponseDTO> skillsets = talent.getTalentSkillsets().stream()
-      // .map(ts -> new SkillsetResponseDTO(ts.getSkillset().getSkillsetId(),
-      // ts.getSkillset().getSkillsetName()))
-      // .collect(Collectors.toList());
-      // td.setSkillSet(skillsets.isEmpty() ? null : skillsets);
-
       td.setEmail(talent.getEmail());
       td.setCellphone(talent.getCellphone());
       td.setEmployeeStatus(
@@ -443,7 +478,6 @@ public class TalentService {
       td.setVideoUrl(talent.getBiographyVideoUrl());
       td.setTalentPhotoUrl(talent.getTalentPhotoUrl());
       td.setTalentCvUrl(talent.getTalentCvUrl());
-     
 
       return ResponseEntity.ok(td);
    }

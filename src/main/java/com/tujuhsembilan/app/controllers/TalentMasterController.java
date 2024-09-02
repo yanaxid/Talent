@@ -74,11 +74,6 @@ public class TalentMasterController {
 
    }
 
-
-
-   
-
-
    // --> [put] :: edit data talent
    @CrossOrigin(origins = "http://localhost:5173")
    @PutMapping(path = { "/talent/{talentId}" }, consumes = {

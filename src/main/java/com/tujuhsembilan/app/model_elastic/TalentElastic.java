@@ -1,4 +1,4 @@
-package com.tujuhsembilan.app.models;
+package com.tujuhsembilan.app.model_elastic;
 
 import lombok.Data;
 import lombok.NoArgsConstructor;
@@ -21,7 +21,7 @@ import java.util.UUID;
 @AllArgsConstructor
 @Builder
 @Document(indexName = "talent_idx")
-public class Talent2 {
+public class TalentElastic {
 
    @Id
    private UUID talentId;
@@ -77,7 +77,7 @@ public class Talent2 {
    private Boolean isActive;
 
    @Field( name = "birth_date")
-   private Instant birthDate;
+   private LocalDateTime birthDate;
 
    @Field(type = FieldType.Text, name = "talent_description")
    private String talentDescription;

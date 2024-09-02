@@ -20,8 +20,8 @@ import org.springframework.web.bind.annotation.RestController;
 
 import com.tujuhsembilan.app.dtos.request.CustomPageRequest;
 import com.tujuhsembilan.app.dtos.request.TalentFilterDTO;
+import com.tujuhsembilan.app.model_elastic.TalentElastic;
 import com.tujuhsembilan.app.models.Talent;
-import com.tujuhsembilan.app.models.Talent2;
 import com.tujuhsembilan.app.services.TalentService;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.domain.Sort;
@@ -53,9 +53,11 @@ public class TalentController {
       return talentService.getTalentById(talentId);
    }
 
+
+
    
    @GetMapping("/talents/search")
-   public Page<Talent2> searchTalents(@Valid TalentFilterDTO filter, CustomPageRequest customPageRequest) {
+   public Page<TalentElastic> searchTalents(@Valid TalentFilterDTO filter, CustomPageRequest customPageRequest) {
       return talentService.searchTalents(filter, customPageRequest.getPage("experience,desc;talent_level_name.keyword,asc;talent_name.keyword,asc"));
    }
 

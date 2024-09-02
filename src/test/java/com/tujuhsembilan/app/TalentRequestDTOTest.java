@@ -30,7 +30,7 @@ public class TalentRequestDTOTest {
 
     @ParameterizedTest(name = "-> nama={0}, exp={1}, email={2}")
     @CsvSource({
-        "budi, 10, john.doe@example.com, 2021-10-10",
+        "budi sidufhsidfjsd sdifjs, 10, john.doe@example.com, 2021-10-10",
         "joko, 5, jane.doe@example.com, 2020-10-10",
         "anwar, 8, mike.ross@example.com, 2020-10-10",
         "majid a, 5, janedoe@e.co, 2020-10-10",
@@ -73,6 +73,10 @@ public class TalentRequestDTOTest {
                 .talentAvailability(true)
                 .videoUrl("video.mp4")
                 .build();
+
+                // validasi file lengkap ?
+                //validasi number
+                
 
         Set<ConstraintViolation<TalentRequestDTO>> violations = validator.validate(dto);
         assertThat(violations).isEmpty();

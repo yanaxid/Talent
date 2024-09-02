@@ -21,7 +21,7 @@ public class TalentDetailResponseDTO {
    private String talentStatus;
    private String nip; //employeeNumber
    private Character sex;
-   private Date dob; //tanggal lahir
+   private String dob; //tanggal lahir
    private String talentDescription;
    private String cv;
    private Integer talentExperience;
